@@ -1,0 +1,66 @@
+<UserControl x:Class="MES_WPF.Views.LoginView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MES_WPF.Views"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="400">
+    
+    <Grid Background="#F5F5F5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 标题 -->
+        <TextBlock Grid.Row="0" Text="MES系统登录" FontSize="24" FontWeight="Bold" 
+                   HorizontalAlignment="Center" Margin="0,20,0,0"/>
+        
+        <!-- 登录表单 -->
+        <StackPanel Grid.Row="1" Width="300" VerticalAlignment="Center">
+            <!-- 用户名 -->
+            <TextBox Margin="0,10,0,10"
+                     materialDesign:HintAssist.Hint="用户名"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
+            
+            <!-- 密码 -->
+            <PasswordBox x:Name="PasswordBox" Margin="0,10,0,10"
+                         materialDesign:HintAssist.Hint="密码"
+                         Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                         PasswordChanged="PasswordBox_PasswordChanged"/>
+            
+            <!-- 错误信息 -->
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" 
+                       TextWrapping="Wrap" Margin="0,5,0,10"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
+            
+            <!-- 登录按钮 -->
+            <Button Content="登录" Command="{Binding LoginCommand}" 
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Height="40" Margin="0,10,0,0">
+                <Button.Resources>
+                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                                                     IsIndeterminate="True" Width="20" Height="20"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </StackPanel>
+        
+        <!-- 底部版权信息 -->
+        <TextBlock Grid.Row="2" Text="© 2024 MES系统 版权所有" 
+                   HorizontalAlignment="Center" Margin="0,0,0,10"/>
+    </Grid>
+</UserControl>
