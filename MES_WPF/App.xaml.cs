@@ -7,15 +7,19 @@ using System.Windows.Controls;
 using MES_WPF.Services;
 using MES_WPF.ViewModels;
 using MES_WPF.ViewModels.SystemManagement;
+using MES_WPF.ViewModels.BasicInformation;
 using MES_WPF.Views;
 using MES_WPF.Views.SystemManagement;
+using MES_WPF.Views.BasicInformation;
 using MES_WPF.Core.Services;
+using MES_WPF.Core.Services.SystemManagement;
+using MES_WPF.Core.Services.BasicInformation;
 using MES_WPF.Data;
 
 using Microsoft.EntityFrameworkCore;
 using MaterialDesignThemes.Wpf;
 using MES_WPF.Data.Repositories.SystemManagement;
-using MES_WPF.Core.Services.SystemManagement;
+using MES_WPF.Data.Repositories.BasicInformation;
 using System.Threading.Tasks;
 
 namespace MES_WPF
@@ -130,6 +134,16 @@ namespace MES_WPF
             services.AddSingleton<ISystemConfigRepository, SystemConfigRepository>();
             services.AddSingleton<IOperationLogRepository, OperationLogRepository>();
 
+            // 基础信息模块仓储
+            services.AddSingleton<IBOMRepository, BOMRepository>();
+            services.AddSingleton<IBOMItemRepository, BOMItemRepository>();
+            services.AddSingleton<IEquipmentRepository, EquipmentRepository>();
+            services.AddSingleton<IOperationRepository, OperationRepository>();
+            services.AddSingleton<IProcessRouteRepository, ProcessRouteRepository>();
+            services.AddSingleton<IProductRepository, ProductRepository>();
+            services.AddSingleton<IResourceRepository, ResourceRepository>();
+            services.AddSingleton<IRouteStepRepository, RouteStepRepository>();
+
             // 注册所有服务
             // 用户相关服务
             services.AddSingleton<IUserService, UserService>();
@@ -148,6 +162,16 @@ namespace MES_WPF
             services.AddSingleton<ISystemConfigService, SystemConfigService>();
             services.AddSingleton<IOperationLogService, OperationLogService>();
 
+            // 基础信息模块服务
+            services.AddSingleton<IBOMService, BOMService>();
+            services.AddSingleton<IBOMItemService, BOMItemService>();
+            services.AddSingleton<IEquipmentService, EquipmentService>();
+            services.AddSingleton<IOperationService, OperationService>();
+            services.AddSingleton<IProcessRouteService, ProcessRouteService>();
+            services.AddSingleton<IProductService, ProductService>();
+            services.AddSingleton<IResourceService, ResourceService>();
+            services.AddSingleton<IRouteStepService, RouteStepService>();
+
             // 注册视图模型
             services.AddSingleton<LoginViewModel>();
             services.AddSingleton<MenuViewModel>();
@@ -161,7 +185,13 @@ namespace MES_WPF
             services.AddSingleton<RoleManagementViewModel>();
             services.AddSingleton<SystemConfigManagementViewModel>();
 
-
+            // 基础信息模块视图模型
+            services.AddSingleton<BOMViewModel>();
+            services.AddSingleton<EquipmentViewModel>();
+            services.AddSingleton<OperationViewModel>();
+            services.AddSingleton<ProcessRouteViewModel>();
+            services.AddSingleton<ProductViewModel>();
+            services.AddSingleton<ResourceViewModel>();
 
             // 注册视图
             services.AddSingleton<DepartmentManagementView>();
@@ -172,6 +202,13 @@ namespace MES_WPF
             services.AddSingleton<RoleManagementView>();
             services.AddSingleton<SystemConfigManagementView>();
 
+            // 基础信息模块视图
+            services.AddSingleton<BOMView>();
+            services.AddSingleton<EquipmentView>();
+            services.AddSingleton<OperationView>();
+            services.AddSingleton<ProcessRouteView>();
+            services.AddSingleton<ProductView>();
+            services.AddSingleton<ResourceView>();
         
             services.AddTransient<LoginView>();
             services.AddTransient<MainWindow>();

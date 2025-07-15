@@ -1,4 +1,4 @@
- <Application x:Class="MES_WPF.App"
+<Application x:Class="MES_WPF.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:MES_WPF"
@@ -16,15 +16,28 @@
 
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
-  
 
 
-            <!-- 转换器 -->
+
+            <!-- 自定义转换器 -->
             <converters:IndexConverter x:Key="IndexConverter" />
             <converters:SanYuanConverter x:Key="SanYuanConverter" />
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-            <materialDesign:BooleanToVisibilityConverter x:Key="MaterialBooleanToVisibilityConverter" TrueValue="Visible" FalseValue="Collapsed"/>
+            <converters:BooleanToVisibilityConverter x:Key="AppBooleanToVisibilityConverter" />
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+            <converters:MaintenanceRequiredConverter x:Key="MaintenanceRequiredConverter" />
+            <converters:ZeroToNewConverter x:Key="ZeroToNewConverter" />
+            <converters:StatusConverter x:Key="StatusConverter" />
+            <converters:NullToBoolConverter x:Key="NotNullToBoolConverter" />
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter"
+                                            Invert="True" />
+
+            <!-- Material Design 转换器，带功能说明 -->
+            <materialDesign:BooleanToVisibilityConverter x:Key="MaterialBooleanToVisibilityConverter"
+                                                         TrueValue="Visible"
+                                                         FalseValue="Collapsed" />
+            <materialDesign:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"
+                                                         TrueValue="Collapsed"
+                                                         FalseValue="Visible" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

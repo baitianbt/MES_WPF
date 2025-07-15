@@ -1,0 +1,311 @@
+<UserControl x:Class="MES_WPF.Views.BasicInformation.EquipmentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MES_WPF.Views.BasicInformation"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1200">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题区域 -->
+        <materialDesign:Card Grid.Row="0" Margin="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="设备管理" 
+                           Style="{StaticResource MaterialDesignHeadline5TextBlock}" 
+                           Margin="16"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Command="{Binding LoadCommand}"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            ToolTip="刷新">
+                        <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24"/>
+                    </Button>
+                    <Button Command="{Binding AddCommand}"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            ToolTip="添加设备">
+                        <materialDesign:PackIcon Kind="Plus" Width="24" Height="24"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- 内容区域 -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 搜索筛选区域 -->
+            <materialDesign:Card Grid.Row="0" Margin="0,0,0,10">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="输入关键词搜索(序列号/型号/制造商/资源名称)..."
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    
+                    <CheckBox Grid.Column="1"
+                              IsChecked="{Binding ShowMaintenanceRequired}"
+                              Content="需要维护的设备"
+                              Margin="10,0"
+                              Style="{StaticResource MaterialDesignCheckBox}"/>
+                    
+                    <Button Grid.Column="2" 
+                            Command="{Binding SearchCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}">
+                        <materialDesign:PackIcon Kind="Magnify"/>
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- 设备数据表格 -->
+            <materialDesign:Card Grid.Row="1">
+                <Grid>
+                    <DataGrid ItemsSource="{Binding Equipments}"
+                              SelectedItem="{Binding SelectedEquipment}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              Style="{StaticResource MaterialDesignDataGrid}"
+                              materialDesign:DataGridAssist.CellPadding="13"
+                              materialDesign:DataGridAssist.ColumnHeaderPadding="13">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="设备型号" Binding="{Binding EquipmentModel}" Width="120"/>
+                            <DataGridTextColumn Header="序列号" Binding="{Binding SerialNumber}" Width="100"/>
+                            <DataGridTextColumn Header="制造商" Binding="{Binding Manufacturer}" Width="120"/>
+                            <DataGridTextColumn Header="资源名称" Binding="{Binding Resource.ResourceName}" Width="120"/>
+                            <DataGridTextColumn Header="IP地址" Binding="{Binding IpAddress}" Width="120"/>
+                            <DataGridTextColumn Header="购买日期" Binding="{Binding PurchaseDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                            <DataGridTextColumn Header="保修期(月)" Binding="{Binding WarrantyPeriod}" Width="80"/>
+                            <DataGridTextColumn Header="保养周期(天)" Binding="{Binding MaintenanceCycle}" Width="100"/>
+                            <DataGridTextColumn Header="上次保养日期" Binding="{Binding LastMaintenanceDate, StringFormat=yyyy-MM-dd}" Width="120"/>
+                            <DataGridTextColumn Header="下次保养日期" Binding="{Binding NextMaintenanceDate, StringFormat=yyyy-MM-dd}" Width="120">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding NextMaintenanceDate, Converter={StaticResource MaintenanceRequiredConverter}}" Value="True">
+                                                <Setter Property="Background" Value="#FFFFCCCC"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Command="{Binding DataContext.EditCommand, 
+                                                     RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="编辑">
+                                                <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.DeleteCommand, 
+                                                     RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="删除">
+                                                <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.RecordMaintenanceCommand, 
+                                                     RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="记录维护">
+                                                <materialDesign:PackIcon Kind="Tools" Width="18" Height="18"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.UpdateMaintenanceCycleCommand, 
+                                                     RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="设置保养周期">
+                                                <materialDesign:PackIcon Kind="CalendarClock" Width="18" Height="18"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="编辑" Command="{Binding EditCommand}">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Pencil"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="删除" Command="{Binding DeleteCommand}">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Delete"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator/>
+                                <MenuItem Header="记录维护" Command="{Binding RecordMaintenanceCommand}">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Tools"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="设置保养周期" Command="{Binding UpdateMaintenanceCycleCommand}">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="CalendarClock"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+
+                    <!-- 加载状态 -->
+                    <materialDesign:Card Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                         Background="#99FFFFFF"
+                                         HorizontalAlignment="Stretch"
+                                         VerticalAlignment="Stretch">
+                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                     IsIndeterminate="True"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                    </materialDesign:Card>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- 编辑对话框 -->
+        <materialDesign:DialogHost Grid.RowSpan="2" 
+                                   IsOpen="{Binding IsEditing}" 
+                                   CloseOnClickAway="False">
+            <materialDesign:DialogHost.DialogContent>
+                <materialDesign:Card MinWidth="500" Margin="16">
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 对话框标题 -->
+                        <TextBlock Grid.Row="0" 
+                                   Text="{Binding EditingEquipment.Id, Converter={StaticResource ZeroToNewConverter}, ConverterParameter='设备'}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   Margin="0,0,0,16"/>
+
+                        <!-- 表单内容 -->
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox Grid.Row="0" Grid.Column="0"
+                                      ItemsSource="{Binding Resources}"
+                                      DisplayMemberPath="ResourceName"
+                                      SelectedValuePath="Id"
+                                      SelectedValue="{Binding EditingEquipment.ResourceId}"
+                                      materialDesign:HintAssist.Hint="选择资源"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="0" Grid.Column="1"
+                                     Text="{Binding EditingEquipment.SerialNumber}"
+                                     materialDesign:HintAssist.Hint="序列号"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="8,8,0,8"/>
+
+                            <TextBox Grid.Row="1" Grid.Column="0"
+                                     Text="{Binding EditingEquipment.EquipmentModel}"
+                                     materialDesign:HintAssist.Hint="设备型号"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="1" Grid.Column="1"
+                                     Text="{Binding EditingEquipment.Manufacturer}"
+                                     materialDesign:HintAssist.Hint="制造商"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="8,8,0,8"/>
+
+                            <DatePicker Grid.Row="2" Grid.Column="0"
+                                        SelectedDate="{Binding EditingEquipment.PurchaseDate}"
+                                        materialDesign:HintAssist.Hint="购买日期"
+                                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                        Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="2" Grid.Column="1"
+                                     Text="{Binding EditingEquipment.WarrantyPeriod}"
+                                     materialDesign:HintAssist.Hint="保修期(月)"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="8,8,0,8"/>
+
+                            <TextBox Grid.Row="3" Grid.Column="0"
+                                     Text="{Binding EditingEquipment.MaintenanceCycle}"
+                                     materialDesign:HintAssist.Hint="保养周期(天)"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,8,8"/>
+
+                            <DatePicker Grid.Row="3" Grid.Column="1"
+                                        SelectedDate="{Binding EditingEquipment.LastMaintenanceDate}"
+                                        materialDesign:HintAssist.Hint="上次保养日期"
+                                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                        Margin="8,8,0,8"/>
+
+                            <DatePicker Grid.Row="4" Grid.Column="0"
+                                        SelectedDate="{Binding EditingEquipment.NextMaintenanceDate}"
+                                        materialDesign:HintAssist.Hint="下次保养日期"
+                                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                        Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="4" Grid.Column="1"
+                                     Text="{Binding EditingEquipment.IpAddress}"
+                                     materialDesign:HintAssist.Hint="IP地址"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="8,8,0,8"/>
+
+                            <TextBox Grid.Row="5" Grid.ColumnSpan="2"
+                                     Text="{Binding EditingEquipment.OpcUaEndpoint}"
+                                     materialDesign:HintAssist.Hint="OPC UA端点"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,0,8"/>
+                        </Grid>
+
+                        <!-- 按钮区域 -->
+                        <StackPanel Grid.Row="2" 
+                                    Orientation="Horizontal" 
+                                    HorizontalAlignment="Right" 
+                                    Margin="0,16,0,0">
+                            <Button Command="{Binding CancelEditCommand}"
+                                    Content="取消"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Margin="8,0"/>
+                            <Button Command="{Binding SaveCommand}"
+                                    Content="保存"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+    </Grid>
+</UserControl>

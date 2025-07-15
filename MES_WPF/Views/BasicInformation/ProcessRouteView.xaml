@@ -1,0 +1,544 @@
+<UserControl x:Class="MES_WPF.Views.BasicInformation.ProcessRouteView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MES_WPF.Views.BasicInformation"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1200">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题区域 -->
+        <materialDesign:Card Grid.Row="0" Margin="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="工艺路线管理" 
+                           Style="{StaticResource MaterialDesignHeadline5TextBlock}" 
+                           Margin="16"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Command="{Binding LoadCommand}"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            ToolTip="刷新">
+                        <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24"/>
+                    </Button>
+                    <Button Command="{Binding AddCommand}"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            ToolTip="添加工艺路线">
+                        <materialDesign:PackIcon Kind="Plus" Width="24" Height="24"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- 内容区域 -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧 - 工艺路线列表 -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 搜索筛选区域 -->
+                <materialDesign:Card Grid.Row="0" Margin="0,0,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="搜索筛选" 
+                                   Style="{StaticResource MaterialDesignSubtitle1TextBlock}" 
+                                   Margin="0,0,0,10"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     materialDesign:HintAssist.Hint="输入关键词搜索..."
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,0,10,0"/>
+                            <Button Grid.Column="1" 
+                                    Command="{Binding SearchCommand}"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}">
+                                <materialDesign:PackIcon Kind="Magnify"/>
+                            </Button>
+                        </Grid>
+
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <ComboBox Grid.Column="0"
+                                      ItemsSource="{Binding Products}"
+                                      DisplayMemberPath="ProductName"
+                                      SelectedValuePath="Id"
+                                      SelectedValue="{Binding SelectedProductId}"
+                                      materialDesign:HintAssist.Hint="选择产品"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,0,5,0"/>
+                            
+                            <ComboBox Grid.Column="1"
+                                      SelectedValue="{Binding StatusFilter}"
+                                      materialDesign:HintAssist.Hint="选择状态"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="5,0,0,0">
+                                <ComboBoxItem Content="全部" Tag="0"/>
+                                <ComboBoxItem Content="草稿" Tag="1"/>
+                                <ComboBoxItem Content="审核中" Tag="2"/>
+                                <ComboBoxItem Content="已发布" Tag="3"/>
+                                <ComboBoxItem Content="已作废" Tag="4"/>
+                            </ComboBox>
+                        </Grid>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- 工艺路线数据表格 -->
+                <materialDesign:Card Grid.Row="1">
+                    <Grid>
+                        <DataGrid ItemsSource="{Binding ProcessRoutes}"
+                                  SelectedItem="{Binding SelectedProcessRoute}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True"
+                                  Style="{StaticResource MaterialDesignDataGrid}"
+                                  materialDesign:DataGridAssist.CellPadding="13"
+                                  materialDesign:DataGridAssist.ColumnHeaderPadding="13">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="编码" Binding="{Binding RouteCode}" Width="120"/>
+                                <DataGridTextColumn Header="名称" Binding="{Binding RouteName}" Width="180"/>
+                                <DataGridTextColumn Header="版本" Binding="{Binding Version}" Width="80"/>
+                                <DataGridTextColumn Header="状态" Width="80">
+                                    <DataGridTextColumn.Binding>
+                                        <MultiBinding StringFormat="{}{0}">
+                                            <Binding Path="Status" Converter="{StaticResource StatusConverter}"/>
+                                        </MultiBinding>
+                                    </DataGridTextColumn.Binding>
+                                </DataGridTextColumn>
+                                <DataGridCheckBoxColumn Header="默认" Binding="{Binding IsDefault}" Width="60"
+                                                        ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                                                        EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"/>
+                                <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime, StringFormat=yyyy-MM-dd HH:mm}" Width="*"/>
+                                <DataGridTemplateColumn Width="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Command="{Binding DataContext.EditCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                        ToolTip="编辑">
+                                                    <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18"/>
+                                                </Button>
+                                                <Button Command="{Binding DataContext.DeleteCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                        ToolTip="删除">
+                                                    <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
+                                                </Button>
+                                                <Button Command="{Binding DataContext.SetDefaultRouteCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                        ToolTip="设为默认"
+                                                        Visibility="{Binding IsDefault, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                    <materialDesign:PackIcon Kind="Star" Width="18" Height="18"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="编辑" Command="{Binding EditCommand}">
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Kind="Pencil"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="删除" Command="{Binding DeleteCommand}">
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Kind="Delete"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <MenuItem Header="设为默认" Command="{Binding SetDefaultRouteCommand}">
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Kind="Star"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <MenuItem Header="状态变更">
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Kind="ArrowRightBold"/>
+                                        </MenuItem.Icon>
+                                        <MenuItem Header="设为草稿" Command="{Binding UpdateStatusCommand}" CommandParameter="1">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="FileDocumentOutline"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="提交审核" Command="{Binding UpdateStatusCommand}" CommandParameter="2">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="FileDocumentCheck"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="发布" Command="{Binding UpdateStatusCommand}" CommandParameter="3">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="FileDocumentCheckOutline"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="作废" Command="{Binding UpdateStatusCommand}" CommandParameter="4">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="FileCancel"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                        </DataGrid>
+                        
+                        <!-- 加载状态 -->
+                        <materialDesign:Card Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                             Background="#99FFFFFF"
+                                             HorizontalAlignment="Stretch"
+                                             VerticalAlignment="Stretch">
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                         IsIndeterminate="True"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"/>
+                        </materialDesign:Card>
+                    </Grid>
+                </materialDesign:Card>
+            </Grid>
+
+            <!-- 分隔线 -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
+
+            <!-- 右侧 - 工艺步骤 -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 工艺步骤标题 -->
+                <materialDesign:Card Grid.Row="0" Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Text="{Binding SelectedProcessRoute.RouteName, StringFormat={}工艺步骤 - {0}}"
+                                   Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                   Margin="16,10"/>
+                        
+                        <Button Grid.Column="1"
+                                Command="{Binding AddStepCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                ToolTip="添加工艺步骤"
+                                IsEnabled="{Binding SelectedProcessRoute, Converter={StaticResource NullToBoolConverter}}">
+                            <materialDesign:PackIcon Kind="Plus" Width="24" Height="24"/>
+                        </Button>
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- 工艺步骤列表 -->
+                <materialDesign:Card Grid.Row="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <DataGrid ItemsSource="{Binding RouteSteps}"
+                                  SelectedItem="{Binding SelectedRouteStep}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True"
+                                  Style="{StaticResource MaterialDesignDataGrid}"
+                                  materialDesign:DataGridAssist.CellPadding="13"
+                                  materialDesign:DataGridAssist.ColumnHeaderPadding="13">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="序号" Binding="{Binding StepNo}" Width="60"/>
+                                <DataGridTextColumn Header="工序名称" Binding="{Binding Operation.OperationName}" Width="150"/>
+                                <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*"/>
+                                <DataGridTextColumn Header="工时(分钟)" Binding="{Binding ProcessTime}" Width="100"/>
+                                <DataGridCheckBoxColumn Header="关键工序" Binding="{Binding IsKeyOperation}" Width="80"
+                                                        ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                                                        EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"/>
+                                <DataGridCheckBoxColumn Header="质检点" Binding="{Binding IsQualityCheckPoint}" Width="60"
+                                                        ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                                                        EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"/>
+                                <DataGridTemplateColumn Width="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Command="{Binding DataContext.EditStepCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                        ToolTip="编辑">
+                                                    <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18"/>
+                                                </Button>
+                                                <Button Command="{Binding DataContext.DeleteStepCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                        ToolTip="删除">
+                                                    <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
+                                                </Button>
+                                                <Button Command="{Binding DataContext.MoveStepUpCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                        ToolTip="上移">
+                                                    <materialDesign:PackIcon Kind="ArrowUp" Width="18" Height="18"/>
+                                                </Button>
+                                                <Button Command="{Binding DataContext.MoveStepDownCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                        ToolTip="下移">
+                                                    <materialDesign:PackIcon Kind="ArrowDown" Width="18" Height="18"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- 无工艺路线选中提示 -->
+                        <TextBlock Text="请选择工艺路线查看步骤"
+                                   Visibility="{Binding SelectedProcessRoute, Converter={StaticResource AppBooleanToVisibilityConverter}}"
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   Foreground="{StaticResource MaterialDesignBodyLight}"/>
+                    </Grid>
+                </materialDesign:Card>
+            </Grid>
+        </Grid>
+
+        <!-- 编辑工艺路线对话框 -->
+        <materialDesign:DialogHost Grid.RowSpan="2" 
+                                   IsOpen="{Binding IsEditing}" 
+                                   CloseOnClickAway="False">
+            <materialDesign:DialogHost.DialogContent>
+                <materialDesign:Card MinWidth="500" Margin="16">
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 对话框标题 -->
+                        <TextBlock Grid.Row="0" 
+                                   Text="{Binding EditingProcessRoute.Id, Converter={StaticResource ZeroToNewConverter}, ConverterParameter='工艺路线'}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   Margin="0,0,0,16"/>
+
+                        <!-- 表单内容 -->
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Row="0" Grid.Column="0"
+                                     Text="{Binding EditingProcessRoute.RouteCode}"
+                                     materialDesign:HintAssist.Hint="工艺路线编码"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="0" Grid.Column="1"
+                                     Text="{Binding EditingProcessRoute.RouteName}"
+                                     materialDesign:HintAssist.Hint="工艺路线名称"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="8,8,0,8"/>
+
+                            <ComboBox Grid.Row="1" Grid.Column="0"
+                                      ItemsSource="{Binding Products}"
+                                      DisplayMemberPath="ProductName"
+                                      SelectedValuePath="Id"
+                                      SelectedValue="{Binding EditingProcessRoute.ProductId}"
+                                      materialDesign:HintAssist.Hint="选择产品"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="1" Grid.Column="1"
+                                     Text="{Binding EditingProcessRoute.Version}"
+                                     materialDesign:HintAssist.Hint="版本号"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="8,8,0,8"/>
+
+                            <ComboBox Grid.Row="2" Grid.Column="0"
+                                      SelectedValue="{Binding EditingProcessRoute.Status}"
+                                      materialDesign:HintAssist.Hint="状态"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,8,8,8">
+                                <ComboBoxItem Content="草稿" Tag="1"/>
+                                <ComboBoxItem Content="审核中" Tag="2"/>
+                                <ComboBoxItem Content="已发布" Tag="3"/>
+                                <ComboBoxItem Content="已作废" Tag="4"/>
+                            </ComboBox>
+
+                            <CheckBox Grid.Row="2" Grid.Column="1"
+                                      Content="是否默认工艺路线"
+                                      IsChecked="{Binding EditingProcessRoute.IsDefault}"
+                                      Style="{StaticResource MaterialDesignCheckBox}"
+                                      Margin="8,8,0,8"/>
+                        </Grid>
+
+                        <!-- 按钮区域 -->
+                        <StackPanel Grid.Row="2" 
+                                    Orientation="Horizontal" 
+                                    HorizontalAlignment="Right" 
+                                    Margin="0,16,0,0">
+                            <Button Command="{Binding CancelEditCommand}"
+                                    Content="取消"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Margin="8,0"/>
+                            <Button Command="{Binding SaveCommand}"
+                                    Content="保存"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+
+        <!-- 编辑工艺步骤对话框 -->
+        <materialDesign:DialogHost Grid.RowSpan="2" 
+                                   IsOpen="{Binding IsEditingStep}" 
+                                   CloseOnClickAway="False">
+            <materialDesign:DialogHost.DialogContent>
+                <materialDesign:Card MinWidth="500" Margin="16">
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 对话框标题 -->
+                        <TextBlock Grid.Row="0" 
+                                   Text="{Binding EditingRouteStep.Id, Converter={StaticResource ZeroToNewConverter}, ConverterParameter='工艺步骤'}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   Margin="0,0,0,16"/>
+
+                        <!-- 表单内容 -->
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Row="0" Grid.Column="0"
+                                     Text="{Binding EditingRouteStep.StepNo}"
+                                     materialDesign:HintAssist.Hint="步骤序号"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,8,8"/>
+
+                            <ComboBox Grid.Row="0" Grid.Column="1"
+                                      ItemsSource="{Binding Operations}"
+                                      DisplayMemberPath="OperationName"
+                                      SelectedValuePath="Id"
+                                      SelectedValue="{Binding EditingRouteStep.OperationId}"
+                                      materialDesign:HintAssist.Hint="选择工序"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="8,8,0,8"/>
+
+                            <TextBox Grid.Row="1" Grid.Column="0"
+                                     Text="{Binding EditingRouteStep.ProcessTime}"
+                                     materialDesign:HintAssist.Hint="加工时间(分钟)"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="1" Grid.Column="1"
+                                     Text="{Binding EditingRouteStep.SetupTime}"
+                                     materialDesign:HintAssist.Hint="准备时间(分钟)"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="8,8,0,8"/>
+
+                            <TextBox Grid.Row="2" Grid.Column="0"
+                                     Text="{Binding EditingRouteStep.WaitTime}"
+                                     materialDesign:HintAssist.Hint="等待时间(分钟)"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,8,8"/>
+
+                            <TextBox Grid.Row="3" Grid.ColumnSpan="2"
+                                     Text="{Binding EditingRouteStep.Description}"
+                                     materialDesign:HintAssist.Hint="步骤描述"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,8,0,8"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     Height="80"
+                                     VerticalScrollBarVisibility="Auto"/>
+
+                            <CheckBox Grid.Row="4" Grid.Column="0"
+                                      Content="关键工序"
+                                      IsChecked="{Binding EditingRouteStep.IsKeyOperation}"
+                                      Style="{StaticResource MaterialDesignCheckBox}"
+                                      Margin="0,8,0,8"/>
+                                      
+                            <CheckBox Grid.Row="4" Grid.Column="1"
+                                      Content="质检点"
+                                      IsChecked="{Binding EditingRouteStep.IsQualityCheckPoint}"
+                                      Style="{StaticResource MaterialDesignCheckBox}"
+                                      Margin="8,8,0,8"/>
+                        </Grid>
+
+                        <!-- 按钮区域 -->
+                        <StackPanel Grid.Row="2" 
+                                    Orientation="Horizontal" 
+                                    HorizontalAlignment="Right" 
+                                    Margin="0,16,0,0">
+                            <Button Command="{Binding CancelEditStepCommand}"
+                                    Content="取消"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Margin="8,0"/>
+                            <Button Command="{Binding SaveStepCommand}"
+                                    Content="保存"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+    </Grid>
+</UserControl>

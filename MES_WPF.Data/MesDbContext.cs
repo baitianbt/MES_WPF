@@ -5,6 +5,7 @@ using System.IO;
 using System;
 using System.Reflection;
 using MES_WPF.Data.EntityConfigurations;
+using MES_WPF.Model.BasicInformation;
 
 namespace MES_WPF.Data
 {
@@ -24,6 +25,16 @@ namespace MES_WPF.Data
         public DbSet<Employee> Employees { get; set; } = null!;
         public DbSet<OperationLog> OperationLogs { get; set; } = null!;
         public DbSet<SystemConfig> SystemConfigs { get; set; } = null!;
+
+        // 基础信息模块
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<BOM> BOMs { get; set; } = null!;
+        public DbSet<BOMItem> BOMItems { get; set; } = null!;
+        public DbSet<ProcessRoute> ProcessRoutes { get; set; } = null!;
+        public DbSet<Operation> Operations { get; set; } = null!;
+        public DbSet<RouteStep> RouteSteps { get; set; } = null!;
+        public DbSet<Resource> Resources { get; set; } = null!;
+        public DbSet<Equipment> Equipment { get; set; } = null!;
 
         public MesDbContext(DbContextOptions<MesDbContext> options)
         : base(options)

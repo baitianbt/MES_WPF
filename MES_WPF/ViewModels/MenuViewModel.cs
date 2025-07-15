@@ -97,6 +97,22 @@ namespace MES_WPF.ViewModels
             dashboardItem.ExpandCommand = new RelayCommand<object>(_ => ToggleMenuExpand(dashboardItem));
             MenuItems.Add(dashboardItem);
 
+            // 基础数据
+            var BasicItem = new MenuItemModel
+            {
+                Title = "基础信息",
+                Icon = PackIconKind.Factory,
+                ViewName = "ProductionView"
+            };
+            BasicItem.ExpandCommand = new RelayCommand<object>(_ => ToggleMenuExpand(BasicItem));
+            BasicItem.SubItems.Add(new MenuItemModel { Title = "BOM管理", ViewName = "BOMView" });
+            BasicItem.SubItems.Add(new MenuItemModel { Title = "设备管理", ViewName = "EquipmentView" });
+            BasicItem.SubItems.Add(new MenuItemModel { Title = "操作管理", ViewName = "OperationView" });
+            BasicItem.SubItems.Add(new MenuItemModel { Title = "工序管理", ViewName = "ProcessRouteView" });
+            BasicItem.SubItems.Add(new MenuItemModel { Title = "产品管理", ViewName = "ProductView" });
+            BasicItem.SubItems.Add(new MenuItemModel { Title = "资源信息管理", ViewName = "ResourceView" });
+            MenuItems.Add(BasicItem);
+
             // 生产管理
             var productionItem = new MenuItemModel
             {
