@@ -475,14 +475,7 @@ namespace MES_WPF.Data
                 await InitializeBOMsAsync(context);
                 
                 // 初始化设备管理模块数据
-                await InitializeParameterLogsAsync(context);
                 
-
-                await InitializeMaintenancePlansAsync(context);
-
-                await InitializeSparesAsync(context);
-
-
                 Debug.WriteLine("基础信息模块数据初始化完成");
             }
             catch (Exception ex)
@@ -959,21 +952,387 @@ namespace MES_WPF.Data
             }
         }
 
+        /// <summary>
+        /// 初始化基础信息模块数据
+        /// </summary>
+        private static async Task InitializeBasicInformationDataAsync(MesDbContext context)
+        {
+            Debug.WriteLine("开始初始化基础信息模块数据...");
 
+            // 1. 添加产品数据
+            Debug.WriteLine("开始添加产品数据");
+            var product1 = new MES_WPF.Model.BasicInformation.Product
+            {
+                ProductCode = "P001",
+                ProductName = "电子控制器",
+                ProductType = 1, // 成品
+                Specification = "ECU-V1.0",
+                Unit = "个",
+                Description = "车载电子控制单元",
+                IsActive = true,
+                CreateTime = DateTime.Now
+            };
+
+            var product2 = new MES_WPF.Model.BasicInformation.Product
+            {
+                ProductCode = "P002",
+                ProductName = "PCB主板",
+                ProductType = 2, // 半成品
+                Specification = "PCB-150x100",
+                Unit = "块",
+                Description = "电子控制器用PCB板",
+                IsActive = true,
+                CreateTime = DateTime.Now
+            };
+
+            var product3 = new MES_WPF.Model.BasicInformation.Product
+            {
+                ProductCode = "M001",
+                ProductName = "芯片",
+                ProductType = 3, // 原材料
+                Specification = "MCU-STM32",
+                Unit = "个",
+                Description = "控制芯片",
+                IsActive = true,
+                CreateTime = DateTime.Now
+            };
+
+            var product4 = new MES_WPF.Model.BasicInformation.Product
+            {
+                ProductCode = "M002",
+                ProductName = "电阻",
+                ProductType = 3, // 原材料
+                Specification = "10kΩ",
+                Unit = "个",
+                Description = "标准电阻",
+                IsActive = true,
+                CreateTime = DateTime.Now
+            };
+
+            var product5 = new MES_WPF.Model.BasicInformation.Product
+            {
+                ProductCode = "M003",
+                ProductName = "电容",
+                ProductType = 3, // 原材料
+                Specification = "100nF",
+                Unit = "个",
+                Description = "标准电容",
+                IsActive = true,
+                CreateTime = DateTime.Now
+            };
+
+            context.Add(product1);
+            context.Add(product2);
+            context.Add(product3);
+            context.Add(product4);
+            context.Add(product5);
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"产品数据添加完成，ID: {product1.Id}, {product2.Id}, {product3.Id}, {product4.Id}, {product5.Id}");
+
+            // 继续添加其他基础信息数据...
+        }
+   
+   
+   
+                /// <summary>
+        /// 初始化维护工单数据
+        /// </summary>
+        private static async Task InitializeMaintenanceOrdersAsync(MesDbContext context)
+        {
+            Debug.WriteLine("开始添加维护工单数据");
+            
+            // 检查是否已存在维护工单数据
+            if (await context.Set<MaintenanceOrder>().AnyAsync())
+            {
+                Debug.WriteLine("维护工单数据已存在，跳过初始化");
+                return;
+            }
+            
+            // 获取设备数据
+            var equipments = await context.Set<Equipment>().ToListAsync();
+            if (equipments == null || equipments.Count == 0)
+            {
+                Debug.WriteLine("找不到设备数据，跳过维护工单初始化");
+                return;
+            }
+            
+            // 获取维护计划数据
+            var maintenancePlans = await context.Set<EquipmentMaintenancePlan>().ToListAsync();
+            if (maintenancePlans == null || maintenancePlans.Count == 0)
+            {
+                Debug.WriteLine("找不到维护计划数据，跳过维护工单初始化");
+                return;
+            }
+            
+            // 获取用户数据
+            var users = await context.Users.ToListAsync();
+            int reportBy = users.FirstOrDefault(u => u.Username == "admin")?.Id ?? 1;
+            int assignedTo = users.FirstOrDefault(u => u.Username == "production")?.Id ?? 1;
+
+            // 创建计划维护工单
+            var order1 = new MaintenanceOrder
+            {
+                OrderCode = "MO001",
+                OrderType = 1, // 计划维护
+                EquipmentId = equipments[0].ResourceId,
+                MaintenancePlanId = maintenancePlans[0].Id, // SMT贴片机日常保养
+                Priority = 5,
+                Status = 4, // 已完成
+                PlanStartTime = DateTime.Now.AddDays(-1),
+                PlanEndTime = DateTime.Now.AddDays(-1).AddHours(1),
+                ActualStartTime = DateTime.Now.AddDays(-1).AddMinutes(10),
+                ActualEndTime = DateTime.Now.AddDays(-1).AddMinutes(40),
+                ReportBy = reportBy,
+                AssignedTo = assignedTo,
+                CreateTime = DateTime.Now.AddDays(-1),
+                UpdateTime = DateTime.Now.AddDays(-1).AddMinutes(40),
+                Remark = "日常保养工单"
+            };
+
+            var order2 = new MaintenanceOrder
+            {
+                OrderCode = "MO002",
+                OrderType = 1, // 计划维护
+                EquipmentId = equipments[1].ResourceId,
+                MaintenancePlanId = maintenancePlans[2].Id, // 焊接工位周检
+                Priority = 6,
+                Status = 3, // 处理中
+                PlanStartTime = DateTime.Now,
+                PlanEndTime = DateTime.Now.AddHours(2),
+                ActualStartTime = DateTime.Now.AddMinutes(-30),
+                ActualEndTime = null,
+                ReportBy = reportBy,
+                AssignedTo = assignedTo,
+                CreateTime = DateTime.Now.AddDays(-1),
+                UpdateTime = DateTime.Now.AddMinutes(-30),
+                Remark = "周度检查工单"
+            };
+
+            // 创建故障维修工单
+            var order3 = new MaintenanceOrder
+            {
+                OrderCode = "MO003",
+                OrderType = 2, // 故障维修
+                EquipmentId = equipments[0].ResourceId,
+                MaintenancePlanId = null,
+                FaultDescription = "设备运行时有异常噪音",
+                FaultCode = "E001",
+                FaultLevel = 2, // 一般
+                Priority = 7,
+                Status = 2, // 已分配
+                PlanStartTime = DateTime.Now.AddHours(1),
+                PlanEndTime = DateTime.Now.AddHours(3),
+                ActualStartTime = null,
+                ActualEndTime = null,
+                ReportBy = reportBy,
+                AssignedTo = assignedTo,
+                CreateTime = DateTime.Now.AddMinutes(-60),
+                UpdateTime = DateTime.Now.AddMinutes(-30),
+                Remark = "需要检查电机轴承"
+            };
+
+            // 创建紧急维修工单
+            var order4 = new MaintenanceOrder
+            {
+                OrderCode = "MO004",
+                OrderType = 3, // 紧急维修
+                EquipmentId = equipments[2].ResourceId,
+                MaintenancePlanId = null,
+                FaultDescription = "测试台无法启动，电源指示灯不亮",
+                FaultCode = "E002",
+                FaultLevel = 3, // 严重
+                Priority = 9,
+                Status = 1, // 待处理
+                PlanStartTime = DateTime.Now,
+                PlanEndTime = DateTime.Now.AddHours(2),
+                ActualStartTime = null,
+                ActualEndTime = null,
+                ReportBy = reportBy,
+                AssignedTo = null,
+                CreateTime = DateTime.Now.AddMinutes(-10),
+                UpdateTime = null,
+                Remark = "紧急处理，可能是电源问题"
+            };
+
+            context.Add(order1);
+            context.Add(order2);
+            context.Add(order3);
+            context.Add(order4);
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"维护工单数据添加完成，ID: {order1.Id}, {order2.Id}, {order3.Id}, {order4.Id}");
+            
+            // 为已完成的工单添加执行记录
+            await InitializeMaintenanceExecutionsAsync(context, order1.Id, order2.Id);
+        }
+                /// <summary>
+        /// 初始化设备参数记录数据
+        /// </summary>
+        private static async Task InitializeParameterLogsAsync(MesDbContext context)
+        {
+            Debug.WriteLine("开始添加设备参数记录数据");
+            
+            // 检查是否已存在参数记录数据
+            if (await context.Set<EquipmentParameterLog>().AnyAsync())
+            {
+                Debug.WriteLine("设备参数记录数据已存在，跳过初始化");
+                return;
+            }
+            
+            // 获取设备数据
+            var equipments = await context.Set<Equipment>().ToListAsync();
+            if (equipments == null || equipments.Count == 0)
+            {
+                Debug.WriteLine("找不到设备数据，跳过参数记录初始化");
+                return;
+            }
+
+            // 创建SMT贴片机的参数记录
+            var smtLogs = new List<EquipmentParameterLog>();
+            
+            // 温度参数记录
+            for (int i = 0; i < 24; i++)
+            {
+                double baseTemp = 45.0;
+                double tempVariation = Math.Sin(i * Math.PI / 12) * 5.0; // 温度在一天内有波动
+                double actualTemp = baseTemp + tempVariation;
+                bool isAlarm = actualTemp > 55.0;
+                
+                var tempLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[0].ResourceId,
+                    ParameterCode = "TEMP",
+                    ParameterName = "工作温度",
+                    ParameterValue = actualTemp.ToString("F1"),
+                    Unit = "°C",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)2 : null, // 警告级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                smtLogs.Add(tempLog);
+            }
+            
+            // 压力参数记录
+            for (int i = 0; i < 24; i += 2)
+            {
+                double basePressure = 0.60;
+                double pressureVariation = (new Random().NextDouble() - 0.5) * 0.1; // 随机波动
+                double actualPressure = basePressure + pressureVariation;
+                bool isAlarm = actualPressure < 0.5 || actualPressure > 0.7;
+                
+                var pressureLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[0].ResourceId,
+                    ParameterCode = "PRES",
+                    ParameterName = "气压",
+                    ParameterValue = actualPressure.ToString("F2"),
+                    Unit = "MPa",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)1 : null, // 提示级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                smtLogs.Add(pressureLog);
+            }
+            
+            // 电流参数记录
+            for (int i = 0; i < 24; i += 3)
+            {
+                double baseCurrent = 10.0;
+                double currentVariation = (new Random().NextDouble() - 0.5) * 2.0; // 随机波动
+                double actualCurrent = baseCurrent + currentVariation;
+                bool isAlarm = actualCurrent > 12.0;
+                
+                var currentLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[0].ResourceId,
+                    ParameterCode = "CURR",
+                    ParameterName = "电流",
+                    ParameterValue = actualCurrent.ToString("F1"),
+                    Unit = "A",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)3 : null, // 严重级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                smtLogs.Add(currentLog);
+            }
+
+            // 创建焊接工位的参数记录
+            var weldLogs = new List<EquipmentParameterLog>();
+            
+            // 温度参数记录
+            for (int i = 0; i < 12; i += 1)
+            {
+                double baseTemp = 350.0;
+                double tempVariation = (new Random().NextDouble() - 0.5) * 20.0; // 随机波动
+                double actualTemp = baseTemp + tempVariation;
+                bool isAlarm = actualTemp < 320.0 || actualTemp > 380.0;
+                
+                var tempLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[1].ResourceId,
+                    ParameterCode = "TEMP",
+                    ParameterName = "焊接温度",
+                    ParameterValue = actualTemp.ToString("F1"),
+                    Unit = "°C",
+                    CollectTime = DateTime.Now.Date.AddHours(i * 2),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)2 : null, // 警告级别
+                    CreateTime = DateTime.Now.Date.AddHours(i * 2)
+                };
+                weldLogs.Add(tempLog);
+            }
+            
+            // 创建测试台的参数记录
+            var testLogs = new List<EquipmentParameterLog>();
+            
+            // 电压参数记录
+            for (int i = 0; i < 24; i += 4)
+            {
+                double baseVoltage = 220.0;
+                double voltageVariation = (new Random().NextDouble() - 0.5) * 10.0; // 随机波动
+                double actualVoltage = baseVoltage + voltageVariation;
+                bool isAlarm = actualVoltage < 210.0 || actualVoltage > 230.0;
+                
+                var voltageLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[2].ResourceId,
+                    ParameterCode = "VOLT",
+                    ParameterName = "电源电压",
+                    ParameterValue = actualVoltage.ToString("F1"),
+                    Unit = "V",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)1 : null, // 提示级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                testLogs.Add(voltageLog);
+            }
+
+            // 添加所有参数记录
+            foreach (var log in smtLogs.Concat(weldLogs).Concat(testLogs))
+            {
+                context.Add(log);
+            }
+
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"设备参数记录数据添加完成，共{smtLogs.Count + weldLogs.Count + testLogs.Count}条");
+        }
         /// <summary>
         /// 初始化备件数据
         /// </summary>
         private static async Task InitializeSparesAsync(MesDbContext context)
         {
             Debug.WriteLine("开始添加备件数据");
-
+            
             // 检查是否已存在备件数据
             if (await context.Set<Spare>().AnyAsync())
             {
                 Debug.WriteLine("备件数据已存在，跳过初始化");
                 return;
             }
-
+            
             // 添加备件数据
             var spare1 = new Spare
             {
@@ -1080,14 +1439,14 @@ namespace MES_WPF.Data
         private static async Task InitializeMaintenancePlansAsync(MesDbContext context)
         {
             Debug.WriteLine("开始添加设备维护计划数据");
-
+            
             // 检查是否已存在维护计划数据
             if (await context.Set<EquipmentMaintenancePlan>().AnyAsync())
             {
                 Debug.WriteLine("维护计划数据已存在，跳过初始化");
                 return;
             }
-
+            
             // 获取设备数据
             var equipments = await context.Set<Equipment>().ToListAsync();
             if (equipments == null || equipments.Count == 0)
@@ -1095,7 +1454,7 @@ namespace MES_WPF.Data
                 Debug.WriteLine("找不到设备数据，跳过维护计划初始化");
                 return;
             }
-
+            
             // 获取管理员用户ID
             var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
             int createBy = adminUser?.Id ?? 1;
@@ -1188,7 +1547,7 @@ namespace MES_WPF.Data
         private static async Task InitializeMaintenanceItemsAsync(MesDbContext context, int plan1Id, int plan2Id, int plan3Id, int plan4Id)
         {
             Debug.WriteLine("开始添加维护项目数据");
-
+            
             // 为日常保养计划添加维护项目
             var items1 = new List<MaintenanceItem>
             {
@@ -1202,8 +1561,7 @@ namespace MES_WPF.Data
                     Tool = "无尘布",
                     SequenceNo = 1,
                     IsRequired = true,
-                    CreateTime = DateTime.Now,
-                   
+                    CreateTime = DateTime.Now
                 },
                 new MaintenanceItem
                 {
@@ -1351,163 +1709,131 @@ namespace MES_WPF.Data
             Debug.WriteLine($"维护项目数据添加完成，共{items1.Count + items2.Count + items3.Count + items4.Count}条");
         }
 
-
         /// <summary>
-        /// 初始化设备参数记录数据
+        /// 初始化维护执行记录数据
         /// </summary>
-        private static async Task InitializeParameterLogsAsync(MesDbContext context)
+        private static async Task InitializeMaintenanceExecutionsAsync(MesDbContext context, int completedOrderId, int inProgressOrderId)
         {
-            Debug.WriteLine("开始添加设备参数记录数据");
-
-            // 检查是否已存在参数记录数据
-            if (await context.Set<EquipmentParameterLog>().AnyAsync())
+            Debug.WriteLine("开始添加维护执行记录数据");
+            
+            // 获取用户数据
+            var users = await context.Users.ToListAsync();
+            int executorId = users.FirstOrDefault(u => u.Username == "production")?.Id ?? 1;
+            
+            // 获取维护项目数据
+            var maintenanceItems = await context.Set<MaintenanceItem>().ToListAsync();
+            if (maintenanceItems == null || maintenanceItems.Count == 0)
             {
-                Debug.WriteLine("设备参数记录数据已存在，跳过初始化");
+                Debug.WriteLine("找不到维护项目数据，跳过维护执行记录初始化");
+                return;
+            }
+            
+            // 获取备件数据
+            var spares = await context.Set<Spare>().ToListAsync();
+            if (spares == null || spares.Count == 0)
+            {
+                Debug.WriteLine("找不到备件数据，跳过备件使用记录初始化");
                 return;
             }
 
-            // 获取设备数据
-            var equipments = await context.Set<Equipment>().ToListAsync();
-            if (equipments == null || equipments.Count == 0)
+            // 为已完成的工单添加执行记录
+            var execution1 = new MaintenanceExecution
             {
-                Debug.WriteLine("找不到设备数据，跳过参数记录初始化");
-                return;
-            }
+                MaintenanceOrderId = completedOrderId,
+                ExecutorId = executorId,
+                StartTime = DateTime.Now.AddDays(-1).AddMinutes(10),
+                EndTime = DateTime.Now.AddDays(-1).AddMinutes(40),
+                LaborTime = 30,
+                ExecutionResult = 1, // 正常
+                ResultDescription = "设备保养完成，运行正常",
+                ImageUrls = "[\"images/maintenance/20230601_001.jpg\", \"images/maintenance/20230601_002.jpg\"]",
+                CreateTime = DateTime.Now.AddDays(-1).AddMinutes(10),
+                UpdateTime = DateTime.Now.AddDays(-1).AddMinutes(40),
+                Remark = "按计划完成日常保养"
+            };
 
-            // 创建SMT贴片机的参数记录
-            var smtLogs = new List<EquipmentParameterLog>();
-
-            // 温度参数记录
-            for (int i = 0; i < 24; i++)
+            // 为进行中的工单添加执行记录
+            var execution2 = new MaintenanceExecution
             {
-                double baseTemp = 45.0;
-                double tempVariation = Math.Sin(i * Math.PI / 12) * 5.0; // 温度在一天内有波动
-                double actualTemp = baseTemp + tempVariation;
-                bool isAlarm = actualTemp > 55.0;
+                MaintenanceOrderId = inProgressOrderId,
+                ExecutorId = executorId,
+                StartTime = DateTime.Now.AddMinutes(-30),
+                EndTime = null,
+                LaborTime = null,
+                ExecutionResult = null,
+                ResultDescription = null,
+                CreateTime = DateTime.Now.AddMinutes(-30),
+                Remark = "正在进行周度检查"
+            };
 
-                var tempLog = new EquipmentParameterLog
-                {
-                    EquipmentId = equipments[0].ResourceId,
-                    ParameterCode = "TEMP",
-                    ParameterName = "工作温度",
-                    ParameterValue = actualTemp.ToString("F1"),
-                    Unit = "°C",
-                    CollectTime = DateTime.Now.Date.AddHours(i),
-                    IsAlarm = isAlarm,
-                    AlarmLevel = isAlarm ? (byte)2 : null, // 警告级别
-                    CreateTime = DateTime.Now.Date.AddHours(i)
-                };
-                smtLogs.Add(tempLog);
-            }
-
-            // 压力参数记录
-            for (int i = 0; i < 24; i += 2)
-            {
-                double basePressure = 0.60;
-                double pressureVariation = (new Random().NextDouble() - 0.5) * 0.1; // 随机波动
-                double actualPressure = basePressure + pressureVariation;
-                bool isAlarm = actualPressure < 0.5 || actualPressure > 0.7;
-
-                var pressureLog = new EquipmentParameterLog
-                {
-                    EquipmentId = equipments[0].ResourceId,
-                    ParameterCode = "PRES",
-                    ParameterName = "气压",
-                    ParameterValue = actualPressure.ToString("F2"),
-                    Unit = "MPa",
-                    CollectTime = DateTime.Now.Date.AddHours(i),
-                    IsAlarm = isAlarm,
-                    AlarmLevel = isAlarm ? (byte)1 : null, // 提示级别
-                    CreateTime = DateTime.Now.Date.AddHours(i)
-                };
-                smtLogs.Add(pressureLog);
-            }
-
-            // 电流参数记录
-            for (int i = 0; i < 24; i += 3)
-            {
-                double baseCurrent = 10.0;
-                double currentVariation = (new Random().NextDouble() - 0.5) * 2.0; // 随机波动
-                double actualCurrent = baseCurrent + currentVariation;
-                bool isAlarm = actualCurrent > 12.0;
-
-                var currentLog = new EquipmentParameterLog
-                {
-                    EquipmentId = equipments[0].ResourceId,
-                    ParameterCode = "CURR",
-                    ParameterName = "电流",
-                    ParameterValue = actualCurrent.ToString("F1"),
-                    Unit = "A",
-                    CollectTime = DateTime.Now.Date.AddHours(i),
-                    IsAlarm = isAlarm,
-                    AlarmLevel = isAlarm ? (byte)3 : null, // 严重级别
-                    CreateTime = DateTime.Now.Date.AddHours(i)
-                };
-                smtLogs.Add(currentLog);
-            }
-
-            // 创建焊接工位的参数记录
-            var weldLogs = new List<EquipmentParameterLog>();
-
-            // 温度参数记录
-            for (int i = 0; i < 12; i += 1)
-            {
-                double baseTemp = 350.0;
-                double tempVariation = (new Random().NextDouble() - 0.5) * 20.0; // 随机波动
-                double actualTemp = baseTemp + tempVariation;
-                bool isAlarm = actualTemp < 320.0 || actualTemp > 380.0;
-
-                var tempLog = new EquipmentParameterLog
-                {
-                    EquipmentId = equipments[1].ResourceId,
-                    ParameterCode = "TEMP",
-                    ParameterName = "焊接温度",
-                    ParameterValue = actualTemp.ToString("F1"),
-                    Unit = "°C",
-                    CollectTime = DateTime.Now.Date.AddHours(i * 2),
-                    IsAlarm = isAlarm,
-                    AlarmLevel = isAlarm ? (byte)2 : null, // 警告级别
-                    CreateTime = DateTime.Now.Date.AddHours(i * 2)
-                };
-                weldLogs.Add(tempLog);
-            }
-
-            // 创建测试台的参数记录
-            var testLogs = new List<EquipmentParameterLog>();
-
-            // 电压参数记录
-            for (int i = 0; i < 24; i += 4)
-            {
-                double baseVoltage = 220.0;
-                double voltageVariation = (new Random().NextDouble() - 0.5) * 10.0; // 随机波动
-                double actualVoltage = baseVoltage + voltageVariation;
-                bool isAlarm = actualVoltage < 210.0 || actualVoltage > 230.0;
-
-                var voltageLog = new EquipmentParameterLog
-                {
-                    EquipmentId = equipments[2].ResourceId,
-                    ParameterCode = "VOLT",
-                    ParameterName = "电源电压",
-                    ParameterValue = actualVoltage.ToString("F1"),
-                    Unit = "V",
-                    CollectTime = DateTime.Now.Date.AddHours(i),
-                    IsAlarm = isAlarm,
-                    AlarmLevel = isAlarm ? (byte)1 : null, // 提示级别
-                    CreateTime = DateTime.Now.Date.AddHours(i)
-                };
-                testLogs.Add(voltageLog);
-            }
-
-            // 添加所有参数记录
-            foreach (var log in smtLogs.Concat(weldLogs).Concat(testLogs))
-            {
-                context.Add(log);
-            }
-
+            context.Add(execution1);
+            context.Add(execution2);
             await context.SaveChangesAsync();
-            Debug.WriteLine($"设备参数记录数据添加完成，共{smtLogs.Count + weldLogs.Count + testLogs.Count}条");
+            Debug.WriteLine($"维护执行记录数据添加完成，ID: {execution1.Id}, {execution2.Id}");
+
+            // 为已完成的执行记录添加维护项目执行记录
+            var itemExecutions = new List<MaintenanceItemExecution>();
+            
+            // 为日常保养工单添加项目执行记录
+            for (int i = 0; i < 3 && i < maintenanceItems.Count; i++)
+            {
+                var itemExecution = new MaintenanceItemExecution
+                {
+                    MaintenanceExecutionId = execution1.Id,
+                    MaintenanceItemId = maintenanceItems[i].Id,
+                    ItemName = maintenanceItems[i].ItemName,
+                    ActualValue = i == 1 ? "0.62" : null, // 为气压检查项添加实际值
+                    IsQualified = true,
+                    ExecutionTime = DateTime.Now.AddDays(-1).AddMinutes(10 + i * 10),
+                    ExecutorId = executorId,
+                    Remark = "正常",
+                    CreateTime = DateTime.Now.AddDays(-1).AddMinutes(10 + i * 10)
+                };
+                itemExecutions.Add(itemExecution);
+            }
+            
+            // 为进行中的工单添加部分已完成的项目执行记录
+            for (int i = 0; i < 1 && i < maintenanceItems.Count; i++)
+            {
+                var itemExecution = new MaintenanceItemExecution
+                {
+                    MaintenanceExecutionId = execution2.Id,
+                    MaintenanceItemId = maintenanceItems[i + 6].Id, // 使用焊接工位的维护项目
+                    ItemName = maintenanceItems[i + 6].ItemName,
+                    IsQualified = true,
+                    ExecutionTime = DateTime.Now.AddMinutes(-20),
+                    ExecutorId = executorId,
+                    Remark = "已检查",
+                    CreateTime = DateTime.Now.AddMinutes(-20)
+                };
+                itemExecutions.Add(itemExecution);
+            }
+
+            foreach (var itemExecution in itemExecutions)
+            {
+                context.Add(itemExecution);
+            }
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"维护项目执行记录数据添加完成，共{itemExecutions.Count}条");
+
+            // 添加备件使用记录
+            var spareUsage1 = new SpareUsage
+            {
+                MaintenanceExecutionId = execution1.Id,
+                SpareId = spares[2].Id, // 润滑油
+                Quantity = 0.1m,
+                UsageType = 3, // 消耗
+                UsageTime = DateTime.Now.AddDays(-1).AddMinutes(25),
+                OperatorId = executorId,
+                CreateTime = DateTime.Now.AddDays(-1).AddMinutes(25),
+                Remark = "用于润滑传动部件"
+            };
+
+            context.Add(spareUsage1);
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"备件使用记录数据添加完成，ID: {spareUsage1.Id}");
         }
 
-
+   
     }
 } 
