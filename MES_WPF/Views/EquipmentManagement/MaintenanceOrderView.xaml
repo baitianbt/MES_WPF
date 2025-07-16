@@ -1,0 +1,750 @@
+<UserControl x:Class="MES_WPF.Views.EquipmentManagement.MaintenanceOrderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MES_WPF.Views.EquipmentManagement"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="600"
+             d:DesignWidth="1100">
+
+    <Grid Background="{DynamicResource MaterialDesignPaper}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <materialDesign:Card materialDesign:ShadowAssist.Darken="True"
+                             Margin="10">
+            <!-- 搜索区域 -->
+            <Grid Grid.Row="1"
+                  Margin="16,16,16,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 搜索框 -->
+                <TextBox Grid.Column="0"
+                         Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         materialDesign:HintAssist.Hint="请输入工单编号或故障描述搜索"
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         Height="50"
+                         VerticalAlignment="Center" />
+
+                <!-- 工单类型下拉框 -->
+                <ComboBox Grid.Column="1"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          materialDesign:HintAssist.Hint="工单类型"
+                          SelectedIndex="{Binding SelectedOrderType}"
+                          Width="120"
+                          Margin="8,0,0,0"
+                          Height="50"
+                          VerticalAlignment="Center">
+                    <ComboBoxItem Content="全部" />
+                    <ComboBoxItem Content="计划维护" />
+                    <ComboBoxItem Content="故障维修" />
+                    <ComboBoxItem Content="紧急维修" />
+                </ComboBox>
+
+                <!-- 状态下拉框 -->
+                <ComboBox Grid.Column="2"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          materialDesign:HintAssist.Hint="状态"
+                          SelectedIndex="{Binding SelectedStatus}"
+                          Width="120"
+                          Margin="8,0,0,0"
+                          Height="50"
+                          VerticalAlignment="Center">
+                    <ComboBoxItem Content="全部" />
+                    <ComboBoxItem Content="待处理" />
+                    <ComboBoxItem Content="已分配" />
+                    <ComboBoxItem Content="处理中" />
+                    <ComboBoxItem Content="已完成" />
+                    <ComboBoxItem Content="已取消" />
+                </ComboBox>
+
+                <!-- 开始日期 -->
+                <DatePicker Grid.Column="3"
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                            materialDesign:HintAssist.Hint="开始日期"
+                            SelectedDate="{Binding StartDate}"
+                            Width="140"
+                            Margin="8,0,0,0"
+                            Height="50"
+                            VerticalAlignment="Center" />
+
+                <!-- 至 -->
+                <TextBlock Grid.Column="4"
+                           Text="至"
+                           VerticalAlignment="Center"
+                           Margin="8,0" />
+
+                <!-- 结束日期 -->
+                <DatePicker Grid.Column="5"
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                            materialDesign:HintAssist.Hint="结束日期"
+                            SelectedDate="{Binding EndDate}"
+                            Width="140"
+                            Margin="0,0,0,0"
+                            Height="50"
+                            VerticalAlignment="Center" />
+
+                <!-- 按钮区域 -->
+                <StackPanel Grid.Column="6" 
+                            Orientation="Horizontal" 
+                            Margin="8,0,0,0">
+                    <!-- 搜索按钮 -->
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Background="#2196F3"
+                            Foreground="White"
+                            Content="搜索"
+                            Command="{Binding SearchOrdersCommand}"
+                            Height="40"
+                            Width="80"
+                            VerticalAlignment="Center" />
+
+                    <!-- 重置按钮 -->
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Content="重置"
+                            Command="{Binding ResetSearchCommand}"
+                            Margin="8,0,0,0"
+                            Height="40"
+                            Width="80"
+                            VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <materialDesign:Card Grid.Row="1" Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                
+                <!-- 操作按钮区 -->
+                <StackPanel Grid.Row="0"
+                            Orientation="Horizontal"
+                            Margin="16,0,16,8"
+                            VerticalAlignment="Top">
+                    <Button Content="+ 新增"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Background="#2196F3"
+                            Foreground="White"
+                            Command="{Binding AddOrderCommand}"
+                            Height="36"
+                            Width="80"
+                            Margin="0,0,8,0" />
+
+                    <Button Content="批量删除"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding BatchDeleteCommand}"
+                            Height="36"
+                            Width="80"
+                            Margin="0,0,8,0" />
+
+                    <Button Content="+ 导出"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding ExportOrdersCommand}"
+                            Height="36"
+                            Width="80" />
+                </StackPanel>
+
+                <!-- 维护工单列表 -->
+                <Border Grid.Row="1"
+                        Background="White"
+                        Margin="16,0,16,0"
+                        CornerRadius="4"
+                        BorderThickness="1"
+                        BorderBrush="#EEEEEE">
+                    <Grid>
+                        <DataGrid ItemsSource="{Binding OrdersView}"
+                                  SelectedItem="{Binding SelectedOrder}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  BorderThickness="0"
+                                  Background="Transparent"
+                                  RowHeight="48"
+                                  Margin="0,0,0,0">
+                            <DataGrid.Resources>
+                                <Style TargetType="DataGridColumnHeader"
+                                       BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                    <Setter Property="Background"
+                                            Value="#F5F5F5" />
+                                    <Setter Property="Foreground"
+                                            Value="#666666" />
+                                    <Setter Property="FontWeight"
+                                            Value="SemiBold" />
+                                    <Setter Property="Padding"
+                                            Value="8" />
+                                    <Setter Property="Height"
+                                            Value="40" />
+                                </Style>
+                            </DataGrid.Resources>
+
+                            <DataGrid.Columns>
+                                <!-- 选择框 -->
+                                <DataGridTemplateColumn Width="50">
+                                    <DataGridTemplateColumn.Header>
+                                        <CheckBox />
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- 工单编号 -->
+                                <DataGridTextColumn Header="工单编号"
+                                                    Binding="{Binding OrderCode}"
+                                                    Width="120" />
+
+                                <!-- 工单类型 -->
+                                <DataGridTemplateColumn Header="工单类型"
+                                                        Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding OrderType}"
+                                                                         Value="1">
+                                                                <Setter Property="Text"
+                                                                        Value="计划维护" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding OrderType}"
+                                                                         Value="2">
+                                                                <Setter Property="Text"
+                                                                        Value="故障维修" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding OrderType}"
+                                                                         Value="3">
+                                                                <Setter Property="Text"
+                                                                        Value="紧急维修" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- 设备 -->
+                                <DataGridTextColumn Header="设备"
+                                                    Binding="{Binding Equipment.Resource.ResourceName}"
+                                                    Width="100" />
+
+                                <!-- 优先级 -->
+                                <DataGridTemplateColumn Header="优先级"
+                                                        Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal"
+                                                        VerticalAlignment="Center">
+                                                <Ellipse Width="8"
+                                                         Height="8"
+                                                         Margin="0,0,4,0"
+                                                         Fill="{Binding Priority, Converter={StaticResource PriorityToBrushConverter}}" />
+                                                <TextBlock Text="{Binding Priority}"
+                                                           VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <!-- 状态 -->
+                                <DataGridTemplateColumn Header="状态"
+                                                        Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}"
+                                                                         Value="1">
+                                                                <Setter Property="Text"
+                                                                        Value="待处理" />
+                                                                <Setter Property="Foreground"
+                                                                        Value="#9E9E9E" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}"
+                                                                         Value="2">
+                                                                <Setter Property="Text"
+                                                                        Value="已分配" />
+                                                                <Setter Property="Foreground"
+                                                                        Value="#2196F3" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}"
+                                                                         Value="3">
+                                                                <Setter Property="Text"
+                                                                        Value="处理中" />
+                                                                <Setter Property="Foreground"
+                                                                        Value="#FFC107" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}"
+                                                                         Value="4">
+                                                                <Setter Property="Text"
+                                                                        Value="已完成" />
+                                                                <Setter Property="Foreground"
+                                                                        Value="#4CAF50" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}"
+                                                                         Value="5">
+                                                                <Setter Property="Text"
+                                                                        Value="已取消" />
+                                                                <Setter Property="Foreground"
+                                                                        Value="#F44336" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- 计划开始时间 -->
+                                <DataGridTextColumn Header="计划开始时间"
+                                                    Binding="{Binding PlanStartTime, StringFormat=yyyy-MM-dd HH:mm}"
+                                                    Width="140" />
+
+                                <!-- 计划结束时间 -->
+                                <DataGridTextColumn Header="计划结束时间"
+                                                    Binding="{Binding PlanEndTime, StringFormat=yyyy-MM-dd HH:mm}"
+                                                    Width="140" />
+
+                                <!-- 分配人员 -->
+                                <DataGridTextColumn Header="分配人员"
+                                                    Binding="{Binding AssignedToUser.RealName}"
+                                                    Width="100" />
+
+                                <!-- 操作 -->
+                                <DataGridTemplateColumn Header="操作"
+                                                        Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="编辑"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="#2196F3"
+                                                        Command="{Binding DataContext.EditOrderCommand, 
+                                                 RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,8,0" />
+
+                                                <Button Content="分配"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="#4CAF50"
+                                                        Command="{Binding DataContext.AssignOrderCommand, 
+                                                 RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,8,0"
+                                                        Visibility="{Binding Status, Converter={StaticResource EqualsConverter}, ConverterParameter=1, 
+                                                     TargetNullValue=Collapsed, FallbackValue=Collapsed}" />
+
+                                                <Button Content="开始"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="#FFC107"
+                                                        Command="{Binding DataContext.StartOrderCommand, 
+                                                 RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,8,0"
+                                                        Visibility="{Binding Status, Converter={StaticResource EqualsConverter}, ConverterParameter=2, 
+                                                     TargetNullValue=Collapsed, FallbackValue=Collapsed}" />
+
+                                                <Button Content="完成"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="#4CAF50"
+                                                        Command="{Binding DataContext.CompleteOrderCommand, 
+                                                 RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,8,0"
+                                                        Visibility="{Binding Status, Converter={StaticResource EqualsConverter}, ConverterParameter=3, 
+                                                     TargetNullValue=Collapsed, FallbackValue=Collapsed}" />
+
+                                                <Button Content="取消"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="#F44336"
+                                                        Command="{Binding DataContext.CancelOrderCommand, 
+                                                 RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,8,0"
+                                                        Visibility="{Binding Status, Converter={StaticResource LessThanConverter}, ConverterParameter=4, 
+                                                     TargetNullValue=Collapsed, FallbackValue=Collapsed}" />
+
+                                                <Button Content="删除"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="#F44336"
+                                                        Command="{Binding DataContext.DeleteOrderCommand, 
+                                                 RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- 加载指示器 -->
+                        <Grid Visibility="{Binding IsRefreshing, Converter={StaticResource BooleanToVisibilityConverter}}"
+                              Background="#80FFFFFF">
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                         Value="0"
+                                         IsIndeterminate="True"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center" />
+                        </Grid>
+
+                        <!-- 空数据提示 -->
+                        <Grid Visibility="{Binding Orders.Count, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=inverse}"
+                              Background="{DynamicResource MaterialDesignPaper}">
+                            <StackPanel VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="Tools"
+                                                         Width="48"
+                                                         Height="48"
+                                                         HorizontalAlignment="Center" />
+                                <TextBlock Text="暂无维护工单数据"
+                                           FontSize="16"
+                                           Margin="0,16,0,8" />
+                                <Button Content="添加工单"
+                                        Command="{Binding AddOrderCommand}"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+                
+                <!-- 分页控件 -->
+                <Grid Grid.Row="2"
+                      Margin="16,8,16,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 每页显示数量 -->
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="共 "
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding TotalCount}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text=" 条"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,16,0" />
+
+                        <TextBlock Text="10条/页"
+                                   VerticalAlignment="Center" />
+                        <materialDesign:PackIcon Kind="ChevronDown"
+                                                 VerticalAlignment="Center"
+                                                 Margin="4,0,0,0" />
+                    </StackPanel>
+
+                    <!-- 分页导航 -->
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Padding="8"
+                                MinWidth="0">
+                            <materialDesign:PackIcon Kind="ChevronLeft" />
+                        </Button>
+
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Content="1"
+                                Background="#2196F3"
+                                Foreground="White"
+                                Padding="8"
+                                MinWidth="0" />
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Content="2"
+                                Padding="8"
+                                MinWidth="0" />
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Content="3"
+                                Padding="8"
+                                MinWidth="0" />
+                        <TextBlock Text="..."
+                                   VerticalAlignment="Center"
+                                   Margin="8,0" />
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Content="8"
+                                Padding="8"
+                                MinWidth="0" />
+
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Padding="8"
+                                MinWidth="0">
+                            <materialDesign:PackIcon Kind="ChevronRight" />
+                        </Button>
+
+                        <TextBlock Text="前往"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0" />
+                        <TextBox Width="40"
+                                 Text="1"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,8,0" />
+                        <TextBlock Text="页"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </materialDesign:Card>
+        
+        <!-- 新增/编辑维护工单蒙版 -->
+        <materialDesign:DialogHost Grid.RowSpan="2" 
+                         IsOpen="{Binding IsOrderDialogOpen}"
+                         CloseOnClickAway="False">
+            <materialDesign:DialogHost.DialogContent>
+                <materialDesign:Card Width="600" 
+                           Padding="16" 
+                           UniformCornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- 标题 -->
+                        <TextBlock Grid.Row="0" 
+                         Text="{Binding IsEditMode, Converter={StaticResource BooleanConverter}, ConverterParameter=编辑维护工单|新增维护工单}" 
+                         FontSize="20" 
+                         FontWeight="Medium" 
+                         Margin="0,0,0,16" />
+
+                        <!-- 表单内容 -->
+                        <ScrollViewer Grid.Row="1" 
+                            VerticalScrollBarVisibility="Auto" 
+                            MaxHeight="500">
+                            <StackPanel>
+                                <!-- 基本信息 -->
+                                <TextBlock Text="基本信息" 
+                                 FontWeight="Medium" 
+                                 Margin="0,0,0,8" />
+
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 工单编号 -->
+                                    <TextBox Grid.Row="0" 
+                                   Grid.Column="0"
+                                   Margin="0,8,8,8"
+                                   Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                   materialDesign:HintAssist.Hint="工单编号*"
+                                   Text="{Binding EditingOrder.OrderCode}" />
+
+                                    <!-- 工单类型 -->
+                                    <ComboBox Grid.Row="0" 
+                                    Grid.Column="1"
+                                    Margin="8,8,0,8"
+                                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                    materialDesign:HintAssist.Hint="工单类型*"
+                                    SelectedIndex="{Binding EditingOrder.OrderType, Converter={StaticResource IndexConverter}, ConverterParameter=-1}">
+                                        <ComboBoxItem Content="计划维护" />
+                                        <ComboBoxItem Content="故障维修" />
+                                        <ComboBoxItem Content="紧急维修" />
+                                    </ComboBox>
+
+                                    <!-- 设备选择 -->
+                                    <ComboBox Grid.Row="1" 
+                                    Grid.Column="0"
+                                    Margin="0,8,8,8"
+                                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                    materialDesign:HintAssist.Hint="设备*"
+                                    ItemsSource="{Binding Equipments}"
+                                    DisplayMemberPath="Resource.ResourceName"
+                                    SelectedValue="{Binding SelectedEquipmentId}"
+                                    SelectedValuePath="Id" />
+
+                                    <!-- 维护计划 -->
+                                    <ComboBox Grid.Row="1" 
+                                    Grid.Column="1"
+                                    Margin="8,8,0,8"
+                                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                    materialDesign:HintAssist.Hint="维护计划"
+                                    ItemsSource="{Binding MaintenancePlans}"
+                                    DisplayMemberPath="PlanName"
+                                    SelectedValue="{Binding SelectedMaintenancePlanId}"
+                                    SelectedValuePath="Id"
+                                    IsEnabled="{Binding EditingOrder.OrderType, Converter={StaticResource EqualsConverter}, ConverterParameter=1}" />
+
+                                    <!-- 计划开始时间 -->
+                                    <DatePicker Grid.Row="2" 
+                                     Grid.Column="0"
+                                     Margin="0,8,8,8"
+                                     Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                     materialDesign:HintAssist.Hint="计划开始日期*"
+                                     SelectedDate="{Binding EditingOrder.PlanStartTime}" />
+                                     
+                                    <!-- 计划结束时间 -->
+                                    <DatePicker Grid.Row="2" 
+                                     Grid.Column="1"
+                                     Margin="8,8,0,8"
+                                     Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                     materialDesign:HintAssist.Hint="计划结束日期*"
+                                     SelectedDate="{Binding EditingOrder.PlanEndTime}" />
+
+                                    <!-- 优先级 -->
+                                    <ComboBox Grid.Row="3" 
+                                    Grid.Column="0"
+                                    Margin="0,8,8,8"
+                                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                    materialDesign:HintAssist.Hint="优先级*"
+                                    SelectedItem="{Binding EditingOrder.Priority}">
+                                        <ComboBoxItem Content="1 (最低)" />
+                                        <ComboBoxItem Content="2" />
+                                        <ComboBoxItem Content="3" />
+                                        <ComboBoxItem Content="4" />
+                                        <ComboBoxItem Content="5" />
+                                        <ComboBoxItem Content="6" />
+                                        <ComboBoxItem Content="7" />
+                                        <ComboBoxItem Content="8" />
+                                        <ComboBoxItem Content="9" />
+                                        <ComboBoxItem Content="10 (最高)" />
+                                    </ComboBox>
+
+                                    <!-- 状态 -->
+                                    <ComboBox Grid.Row="3" 
+                                    Grid.Column="1"
+                                    Margin="8,8,0,8"
+                                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                    materialDesign:HintAssist.Hint="状态*"
+                                    SelectedIndex="{Binding EditingOrder.Status, Converter={StaticResource IndexConverter}, ConverterParameter=-1}">
+                                        <ComboBoxItem Content="待处理" />
+                                        <ComboBoxItem Content="已分配" />
+                                        <ComboBoxItem Content="处理中" />
+                                        <ComboBoxItem Content="已完成" />
+                                        <ComboBoxItem Content="已取消" />
+                                    </ComboBox>
+
+                                    <!-- 分配人员 -->
+                                    <ComboBox Grid.Row="4" 
+                                    Grid.Column="0"
+                                    Margin="0,8,8,8"
+                                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                    materialDesign:HintAssist.Hint="分配人员"
+                                    ItemsSource="{Binding Users}"
+                                    DisplayMemberPath="RealName"
+                                    SelectedValue="{Binding SelectedAssignedToId}"
+                                    SelectedValuePath="Id" />
+                                </Grid>
+
+                                <!-- 故障信息 - 仅故障维修或紧急维修时显示 -->
+                                <StackPanel Visibility="{Binding EditingOrder.OrderType, Converter={StaticResource NotEqualsConverter}, ConverterParameter=1, 
+                                              TargetNullValue=Collapsed, FallbackValue=Collapsed}">
+                                    <TextBlock Text="故障信息" 
+                                     FontWeight="Medium" 
+                                     Margin="0,8,0,8" />
+
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 故障代码 -->
+                                        <TextBox Grid.Row="0" 
+                                       Grid.Column="0"
+                                       Margin="0,8,8,8"
+                                       Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                       materialDesign:HintAssist.Hint="故障代码"
+                                       Text="{Binding EditingOrder.FaultCode}" />
+
+                                        <!-- 故障等级 -->
+                                        <ComboBox Grid.Row="0" 
+                                        Grid.Column="1"
+                                        Margin="8,8,0,8"
+                                        Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                        materialDesign:HintAssist.Hint="故障等级"
+                                        SelectedIndex="{Binding EditingOrder.FaultLevel, Converter={StaticResource IndexConverter}, ConverterParameter=-1}">
+                                            <ComboBoxItem Content="轻微" />
+                                            <ComboBoxItem Content="一般" />
+                                            <ComboBoxItem Content="严重" />
+                                        </ComboBox>
+
+                                        <!-- 故障描述 -->
+                                        <TextBox Grid.Row="1" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Margin="0,8,0,8"
+                                       Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                       materialDesign:HintAssist.Hint="故障描述"
+                                       TextWrapping="Wrap"
+                                       AcceptsReturn="True"
+                                       VerticalScrollBarVisibility="Auto"
+                                       Height="80"
+                                       Text="{Binding EditingOrder.FaultDescription}" />
+                                    </Grid>
+                                </StackPanel>
+
+                                <!-- 备注 -->
+                                <TextBlock Text="备注" 
+                                 FontWeight="Medium" 
+                                 Margin="0,8,0,8" />
+                                <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                               materialDesign:HintAssist.Hint="备注"
+                               TextWrapping="Wrap"
+                               AcceptsReturn="True"
+                               VerticalScrollBarVisibility="Auto"
+                               Height="80"
+                               Text="{Binding EditingOrder.Remark}"
+                               Margin="0,8,0,8" />
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- 按钮区域 -->
+                        <StackPanel Grid.Row="2" 
+                          Orientation="Horizontal" 
+                          HorizontalAlignment="Right" 
+                          Margin="0,16,0,0">
+                            <Button Content="取消" 
+                          Style="{StaticResource MaterialDesignOutlinedButton}" 
+                          Command="{Binding CancelEditCommand}"
+                          Margin="0,0,8,0" />
+                            <Button Content="保存" 
+                          Style="{StaticResource MaterialDesignRaisedButton}"
+                          Background="#2196F3"
+                          Foreground="White"
+                          Command="{Binding SaveOrderCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+    </Grid>
+</UserControl>

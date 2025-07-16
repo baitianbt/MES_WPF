@@ -6,6 +6,8 @@ using System;
 using System.Reflection;
 using MES_WPF.Data.EntityConfigurations;
 using MES_WPF.Model.BasicInformation;
+using MES_WPF.Model.EquipmentManagement;
+using MES_WPF.Model.EquipmentManagement;
 
 namespace MES_WPF.Data
 {
@@ -35,6 +37,16 @@ namespace MES_WPF.Data
         public DbSet<RouteStep> RouteSteps { get; set; } = null!;
         public DbSet<Resource> Resources { get; set; } = null!;
         public DbSet<Equipment> Equipment { get; set; } = null!;
+        
+        // 设备管理模块
+        public DbSet<EquipmentMaintenancePlan> EquipmentMaintenancePlans { get; set; } = null!;
+        public DbSet<MaintenanceItem> MaintenanceItems { get; set; } = null!;
+        public DbSet<MaintenanceOrder> MaintenanceOrders { get; set; } = null!;
+        public DbSet<MaintenanceExecution> MaintenanceExecutions { get; set; } = null!;
+        public DbSet<MaintenanceItemExecution> MaintenanceItemExecutions { get; set; } = null!;
+        public DbSet<Spare> Spares { get; set; } = null!;
+        public DbSet<SpareUsage> SpareUsages { get; set; } = null!;
+        public DbSet<EquipmentParameterLog> EquipmentParameterLogs { get; set; } = null!;
 
         public MesDbContext(DbContextOptions<MesDbContext> options)
         : base(options)

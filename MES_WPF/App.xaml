@@ -20,6 +20,11 @@
 
 
             <!-- 自定义转换器 -->
+            <converters:PriorityToBrushConverter x:Key="PriorityToBrushConverter" />
+            <converters:EqualsConverter x:Key="EqualsConverter" />
+            <converters:StockWarningConverter x:Key="StockWarningConverter" />
+            <converters:StockDisplayConverter x:Key="StockDisplayConverter" />
+            <converters:NotEqualsConverter x:Key="NotEqualsConverter" />
             <converters:IndexConverter x:Key="IndexConverter" />
             <converters:SanYuanConverter x:Key="SanYuanConverter" />
             <converters:BooleanToVisibilityConverter x:Key="AppBooleanToVisibilityConverter" />
@@ -28,6 +33,8 @@
             <converters:ZeroToNewConverter x:Key="ZeroToNewConverter" />
             <converters:StatusConverter x:Key="StatusConverter" />
             <converters:NullToBoolConverter x:Key="NotNullToBoolConverter" />
+            <converters:EndTimeToVisibilityConverter x:Key="EndTimeToVisibilityConverter" />
+            <converters:NextExecuteDateWarningConverter x:Key="NextExecuteDateWarningConverter" />
             <converters:NullToBoolConverter x:Key="NullToBoolConverter"
                                             Invert="True" />
 

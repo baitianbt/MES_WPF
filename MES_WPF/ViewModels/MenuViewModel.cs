@@ -134,9 +134,12 @@ namespace MES_WPF.ViewModels
                 ViewName = "EquipmentView"
             };
             equipmentItem.ExpandCommand = new RelayCommand<object>(_ => ToggleMenuExpand(equipmentItem));
-            equipmentItem.SubItems.Add(new MenuItemModel { Title = "设备台账", ViewName = "EquipmentInventoryView" });
-            equipmentItem.SubItems.Add(new MenuItemModel { Title = "设备维护", ViewName = "EquipmentMaintenanceView" });
-            equipmentItem.SubItems.Add(new MenuItemModel { Title = "设备监控", ViewName = "EquipmentMonitoringView" });
+            equipmentItem.SubItems.Add(new MenuItemModel { Title = "维护执行", ViewName = "MaintenanceExecutionView" });
+            equipmentItem.SubItems.Add(new MenuItemModel { Title = "维护项目", ViewName = "MaintenanceItemView" });
+            equipmentItem.SubItems.Add(new MenuItemModel { Title = "维护订单", ViewName = "MaintenanceOrderView" });
+            equipmentItem.SubItems.Add(new MenuItemModel { Title = "设备维护计划", ViewName = "MaintenancePlanView" });
+            equipmentItem.SubItems.Add(new MenuItemModel { Title = "参数日志", ViewName = "MaintenanceItemView" });
+            equipmentItem.SubItems.Add(new MenuItemModel { Title = "备件仓", ViewName = "SpareView" });
             MenuItems.Add(equipmentItem);
 
             // 物料管理

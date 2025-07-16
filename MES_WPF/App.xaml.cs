@@ -21,6 +21,10 @@ using MaterialDesignThemes.Wpf;
 using MES_WPF.Data.Repositories.SystemManagement;
 using MES_WPF.Data.Repositories.BasicInformation;
 using System.Threading.Tasks;
+using MES_WPF.Core.Services.EquipmentManagement;
+using MES_WPF.Data.Repositories.EquipmentManagement;
+using MES_WPF.ViewModels.EquipmentManagement;
+using MES_WPF.Views.EquipmentManagement;
 
 namespace MES_WPF
 {
@@ -144,6 +148,16 @@ namespace MES_WPF
             services.AddSingleton<IResourceRepository, ResourceRepository>();
             services.AddSingleton<IRouteStepRepository, RouteStepRepository>();
 
+            // 设备管理模块仓储
+            services.AddSingleton<IMaintenanceOrderRepository, MaintenanceOrderRepository>();
+            services.AddSingleton<IMaintenanceExecutionRepository, MaintenanceExecutionRepository>();
+            services.AddSingleton<IMaintenanceItemExecutionRepository, MaintenanceItemExecutionRepository>();
+            services.AddSingleton<IEquipmentMaintenancePlanRepository, EquipmentMaintenancePlanRepository>();
+            services.AddSingleton<IEquipmentParameterLogRepository, EquipmentParameterLogRepository>();
+            services.AddSingleton<IMaintenanceItemRepository, MaintenanceItemRepository>();
+            services.AddSingleton<ISpareRepository, SpareRepository>();
+            services.AddSingleton<ISpareUsageRepository, SpareUsageRepository>();
+
             // 注册所有服务
             // 用户相关服务
             services.AddSingleton<IUserService, UserService>();
@@ -172,6 +186,17 @@ namespace MES_WPF
             services.AddSingleton<IResourceService, ResourceService>();
             services.AddSingleton<IRouteStepService, RouteStepService>();
 
+
+
+            // 设备管理模块服务
+            services.AddSingleton<IMaintenanceOrderService, MaintenanceOrderService>();
+            services.AddSingleton<IMaintenanceExecutionService, MaintenanceExecutionService>();
+            services.AddSingleton<IMaintenanceItemExecutionService, MaintenanceItemExecutionService>();
+            services.AddSingleton<IEquipmentMaintenancePlanService, EquipmentMaintenancePlanService>();
+            services.AddSingleton<IMaintenanceItemService, MaintenanceItemService>();
+            services.AddSingleton<IEquipmentParameterLogService, EquipmentParameterLogService>();
+            services.AddSingleton<ISpareService, SpareService>();
+            services.AddSingleton<ISpareUsageService, SpareUsageService>();
             // 注册视图模型
             services.AddSingleton<LoginViewModel>();
             services.AddSingleton<MenuViewModel>();
@@ -185,6 +210,14 @@ namespace MES_WPF
             services.AddSingleton<RoleManagementViewModel>();
             services.AddSingleton<SystemConfigManagementViewModel>();
 
+            // 设备管理模块视图模型
+            services.AddSingleton<MaintenanceExecutionViewModel>();
+            services.AddSingleton<MaintenanceItemViewModel>();
+            services.AddSingleton<MaintenanceOrderViewModel>();
+            services.AddSingleton<MaintenancePlanViewModel>();
+            services.AddSingleton<ParameterLogViewModel>();
+            services.AddSingleton<SpareViewModel>();
+
             // 基础信息模块视图模型
             services.AddSingleton<BOMViewModel>();
             services.AddSingleton<EquipmentViewModel>();
@@ -192,6 +225,16 @@ namespace MES_WPF
             services.AddSingleton<ProcessRouteViewModel>();
             services.AddSingleton<ProductViewModel>();
             services.AddSingleton<ResourceViewModel>();
+
+
+            // 设备管理模块视图
+            services.AddSingleton<MaintenanceExecutionView>();
+            services.AddSingleton<MaintenanceItemView>();
+            services.AddSingleton<MaintenanceOrderView>();
+            services.AddSingleton<MaintenancePlanView>();
+            services.AddSingleton<ParameterLogView>();
+            services.AddSingleton<SpareView>();
+
 
             // 注册视图
             services.AddSingleton<DepartmentManagementView>();

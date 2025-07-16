@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using MES_WPF.Model.BasicInformation;
+using MES_WPF.Model.EquipmentManagement;
 
 namespace MES_WPF.Data
 {
@@ -473,6 +474,15 @@ namespace MES_WPF.Data
                 // 初始化BOM数据
                 await InitializeBOMsAsync(context);
                 
+                // 初始化设备管理模块数据
+                await InitializeParameterLogsAsync(context);
+                
+
+                await InitializeMaintenancePlansAsync(context);
+
+                await InitializeSparesAsync(context);
+
+
                 Debug.WriteLine("基础信息模块数据初始化完成");
             }
             catch (Exception ex)
@@ -949,84 +959,555 @@ namespace MES_WPF.Data
             }
         }
 
+
         /// <summary>
-        /// 初始化基础信息模块数据
+        /// 初始化备件数据
         /// </summary>
-        private static async Task InitializeBasicInformationDataAsync(MesDbContext context)
+        private static async Task InitializeSparesAsync(MesDbContext context)
         {
-            Debug.WriteLine("开始初始化基础信息模块数据...");
+            Debug.WriteLine("开始添加备件数据");
 
-            // 1. 添加产品数据
-            Debug.WriteLine("开始添加产品数据");
-            var product1 = new MES_WPF.Model.BasicInformation.Product
+            // 检查是否已存在备件数据
+            if (await context.Set<Spare>().AnyAsync())
             {
-                ProductCode = "P001",
-                ProductName = "电子控制器",
-                ProductType = 1, // 成品
-                Specification = "ECU-V1.0",
+                Debug.WriteLine("备件数据已存在，跳过初始化");
+                return;
+            }
+
+            // 添加备件数据
+            var spare1 = new Spare
+            {
+                SpareCode = "SP001",
+                SpareName = "电机轴承",
+                SpareType = 2, // 维修件
+                Specification = "6205-2RS",
                 Unit = "个",
-                Description = "车载电子控制单元",
+                StockQuantity = 20,
+                MinimumStock = 5,
+                Price = 35.50m,
+                Supplier = "轴承供应商A",
+                LeadTime = 7,
+                Location = "A区-01-01",
                 IsActive = true,
-                CreateTime = DateTime.Now
+                CreateTime = DateTime.Now,
+                Remark = "SMT贴片机主轴承"
             };
 
-            var product2 = new MES_WPF.Model.BasicInformation.Product
+            var spare2 = new Spare
             {
-                ProductCode = "P002",
-                ProductName = "PCB主板",
-                ProductType = 2, // 半成品
-                Specification = "PCB-150x100",
+                SpareCode = "SP002",
+                SpareName = "传感器",
+                SpareType = 3, // 备用件
+                Specification = "接近开关NPN NC",
+                Unit = "个",
+                StockQuantity = 10,
+                MinimumStock = 3,
+                Price = 120.00m,
+                Supplier = "自动化元件供应商B",
+                LeadTime = 14,
+                Location = "A区-01-02",
+                IsActive = true,
+                CreateTime = DateTime.Now,
+                Remark = "焊接设备用接近开关"
+            };
+
+            var spare3 = new Spare
+            {
+                SpareCode = "SP003",
+                SpareName = "润滑油",
+                SpareType = 1, // 易耗品
+                Specification = "高温润滑脂 100g",
+                Unit = "瓶",
+                StockQuantity = 30,
+                MinimumStock = 10,
+                Price = 25.80m,
+                Supplier = "润滑油供应商C",
+                LeadTime = 5,
+                Location = "B区-02-01",
+                IsActive = true,
+                CreateTime = DateTime.Now,
+                Remark = "设备日常维护用"
+            };
+
+            var spare4 = new Spare
+            {
+                SpareCode = "SP004",
+                SpareName = "控制板",
+                SpareType = 3, // 备用件
+                Specification = "PLC控制板XYZ-100",
                 Unit = "块",
-                Description = "电子控制器用PCB板",
+                StockQuantity = 2,
+                MinimumStock = 1,
+                Price = 1200.00m,
+                Supplier = "自动化元件供应商D",
+                LeadTime = 30,
+                Location = "C区-03-01",
                 IsActive = true,
-                CreateTime = DateTime.Now
+                CreateTime = DateTime.Now,
+                Remark = "测试设备主控板"
             };
 
-            var product3 = new MES_WPF.Model.BasicInformation.Product
+            var spare5 = new Spare
             {
-                ProductCode = "M001",
-                ProductName = "芯片",
-                ProductType = 3, // 原材料
-                Specification = "MCU-STM32",
+                SpareCode = "SP005",
+                SpareName = "密封圈",
+                SpareType = 1, // 易耗品
+                Specification = "O型圈 20mm",
                 Unit = "个",
-                Description = "控制芯片",
+                StockQuantity = 100,
+                MinimumStock = 30,
+                Price = 2.50m,
+                Supplier = "密封件供应商E",
+                LeadTime = 3,
+                Location = "B区-02-02",
                 IsActive = true,
-                CreateTime = DateTime.Now
+                CreateTime = DateTime.Now,
+                Remark = "液压系统密封用"
             };
 
-            var product4 = new MES_WPF.Model.BasicInformation.Product
-            {
-                ProductCode = "M002",
-                ProductName = "电阻",
-                ProductType = 3, // 原材料
-                Specification = "10kΩ",
-                Unit = "个",
-                Description = "标准电阻",
-                IsActive = true,
-                CreateTime = DateTime.Now
-            };
-
-            var product5 = new MES_WPF.Model.BasicInformation.Product
-            {
-                ProductCode = "M003",
-                ProductName = "电容",
-                ProductType = 3, // 原材料
-                Specification = "100nF",
-                Unit = "个",
-                Description = "标准电容",
-                IsActive = true,
-                CreateTime = DateTime.Now
-            };
-
-            context.Add(product1);
-            context.Add(product2);
-            context.Add(product3);
-            context.Add(product4);
-            context.Add(product5);
+            context.Add(spare1);
+            context.Add(spare2);
+            context.Add(spare3);
+            context.Add(spare4);
+            context.Add(spare5);
             await context.SaveChangesAsync();
-            Debug.WriteLine($"产品数据添加完成，ID: {product1.Id}, {product2.Id}, {product3.Id}, {product4.Id}, {product5.Id}");
-
-            // 继续添加其他基础信息数据...
+            Debug.WriteLine($"备件数据添加完成，ID: {spare1.Id}, {spare2.Id}, {spare3.Id}, {spare4.Id}, {spare5.Id}");
         }
+
+        /// <summary>
+        /// 初始化设备维护计划数据
+        /// </summary>
+        private static async Task InitializeMaintenancePlansAsync(MesDbContext context)
+        {
+            Debug.WriteLine("开始添加设备维护计划数据");
+
+            // 检查是否已存在维护计划数据
+            if (await context.Set<EquipmentMaintenancePlan>().AnyAsync())
+            {
+                Debug.WriteLine("维护计划数据已存在，跳过初始化");
+                return;
+            }
+
+            // 获取设备数据
+            var equipments = await context.Set<Equipment>().ToListAsync();
+            if (equipments == null || equipments.Count == 0)
+            {
+                Debug.WriteLine("找不到设备数据，跳过维护计划初始化");
+                return;
+            }
+
+            // 获取管理员用户ID
+            var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+            int createBy = adminUser?.Id ?? 1;
+
+            // 为SMT贴片机添加维护计划
+            var plan1 = new EquipmentMaintenancePlan
+            {
+                PlanCode = "MP001",
+                PlanName = "SMT贴片机日常保养",
+                EquipmentId = equipments[0].ResourceId,
+                MaintenanceType = 1, // 日常保养
+                CycleType = 1, // 天
+                CycleValue = 1,
+                StandardTime = 30, // 30分钟
+                LastExecuteDate = DateTime.Now.AddDays(-1),
+                NextExecuteDate = DateTime.Now,
+                Status = 1, // 启用
+                CreateBy = createBy,
+                CreateTime = DateTime.Now,
+                Remark = "每日设备清洁和检查"
+            };
+
+            var plan2 = new EquipmentMaintenancePlan
+            {
+                PlanCode = "MP002",
+                PlanName = "SMT贴片机月度维护",
+                EquipmentId = equipments[0].ResourceId,
+                MaintenanceType = 2, // 定期维护
+                CycleType = 3, // 月
+                CycleValue = 1,
+                StandardTime = 120, // 120分钟
+                LastExecuteDate = DateTime.Now.AddMonths(-1),
+                NextExecuteDate = DateTime.Now.AddMonths(1),
+                Status = 1, // 启用
+                CreateBy = createBy,
+                CreateTime = DateTime.Now,
+                Remark = "月度全面检查和润滑"
+            };
+
+            // 为焊接工位添加维护计划
+            var plan3 = new EquipmentMaintenancePlan
+            {
+                PlanCode = "MP003",
+                PlanName = "焊接工位周检",
+                EquipmentId = equipments[1].ResourceId,
+                MaintenanceType = 2, // 定期维护
+                CycleType = 2, // 周
+                CycleValue = 1,
+                StandardTime = 60, // 60分钟
+                LastExecuteDate = DateTime.Now.AddDays(-7),
+                NextExecuteDate = DateTime.Now,
+                Status = 1, // 启用
+                CreateBy = createBy,
+                CreateTime = DateTime.Now,
+                Remark = "焊接设备周度检查"
+            };
+
+            // 为测试台添加维护计划
+            var plan4 = new EquipmentMaintenancePlan
+            {
+                PlanCode = "MP004",
+                PlanName = "测试台季度校准",
+                EquipmentId = equipments[2].ResourceId,
+                MaintenanceType = 3, // 预防性维护
+                CycleType = 4, // 季度
+                CycleValue = 1,
+                StandardTime = 240, // 240分钟
+                LastExecuteDate = DateTime.Now.AddMonths(-3),
+                NextExecuteDate = DateTime.Now,
+                Status = 1, // 启用
+                CreateBy = createBy,
+                CreateTime = DateTime.Now,
+                Remark = "测试设备季度校准和全面检查"
+            };
+
+            context.Add(plan1);
+            context.Add(plan2);
+            context.Add(plan3);
+            context.Add(plan4);
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"设备维护计划数据添加完成，ID: {plan1.Id}, {plan2.Id}, {plan3.Id}, {plan4.Id}");
+
+            // 为维护计划添加维护项目
+            await InitializeMaintenanceItemsAsync(context, plan1.Id, plan2.Id, plan3.Id, plan4.Id);
+        }
+
+        /// <summary>
+        /// 初始化维护项目数据
+        /// </summary>
+        private static async Task InitializeMaintenanceItemsAsync(MesDbContext context, int plan1Id, int plan2Id, int plan3Id, int plan4Id)
+        {
+            Debug.WriteLine("开始添加维护项目数据");
+
+            // 为日常保养计划添加维护项目
+            var items1 = new List<MaintenanceItem>
+            {
+                new MaintenanceItem
+                {
+                    ItemCode = "MI001",
+                    ItemName = "清洁设备表面",
+                    MaintenancePlanId = plan1Id,
+                    ItemType = 2, // 清洁
+                    Method = "使用无尘布擦拭设备表面",
+                    Tool = "无尘布",
+                    SequenceNo = 1,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now,
+                   
+                },
+                new MaintenanceItem
+                {
+                    ItemCode = "MI002",
+                    ItemName = "检查气压",
+                    MaintenancePlanId = plan1Id,
+                    ItemType = 1, // 检查
+                    StandardValue = "0.6",
+                    UpperLimit = "0.7",
+                    LowerLimit = "0.5",
+                    Unit = "MPa",
+                    Method = "查看气压表读数",
+                    SequenceNo = 2,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                },
+                new MaintenanceItem
+                {
+                    ItemCode = "MI003",
+                    ItemName = "检查安全装置",
+                    MaintenancePlanId = plan1Id,
+                    ItemType = 1, // 检查
+                    Method = "确认安全光栅和急停按钮功能正常",
+                    SequenceNo = 3,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                }
+            };
+
+            // 为月度维护计划添加维护项目
+            var items2 = new List<MaintenanceItem>
+            {
+                new MaintenanceItem
+                {
+                    ItemCode = "MI004",
+                    ItemName = "润滑传动部件",
+                    MaintenancePlanId = plan2Id,
+                    ItemType = 3, // 润滑
+                    Method = "在指定位置注入润滑油",
+                    Tool = "润滑油枪",
+                    SequenceNo = 1,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                },
+                new MaintenanceItem
+                {
+                    ItemCode = "MI005",
+                    ItemName = "检查电机轴承",
+                    MaintenancePlanId = plan2Id,
+                    ItemType = 1, // 检查
+                    Method = "听声音，检查是否有异常噪音",
+                    SequenceNo = 2,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                },
+                new MaintenanceItem
+                {
+                    ItemCode = "MI006",
+                    ItemName = "清洁内部零件",
+                    MaintenancePlanId = plan2Id,
+                    ItemType = 2, // 清洁
+                    Method = "拆开外壳清洁内部零件",
+                    Tool = "螺丝刀，无尘布",
+                    SequenceNo = 3,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                }
+            };
+
+            // 为焊接工位周检添加维护项目
+            var items3 = new List<MaintenanceItem>
+            {
+                new MaintenanceItem
+                {
+                    ItemCode = "MI007",
+                    ItemName = "检查焊接头",
+                    MaintenancePlanId = plan3Id,
+                    ItemType = 1, // 检查
+                    Method = "检查焊接头是否磨损",
+                    SequenceNo = 1,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                },
+                new MaintenanceItem
+                {
+                    ItemCode = "MI008",
+                    ItemName = "清洁焊接残渣",
+                    MaintenancePlanId = plan3Id,
+                    ItemType = 2, // 清洁
+                    Method = "清除焊接残渣",
+                    Tool = "刮刀，清洁剂",
+                    SequenceNo = 2,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                }
+            };
+
+            // 为测试台季度校准添加维护项目
+            var items4 = new List<MaintenanceItem>
+            {
+                new MaintenanceItem
+                {
+                    ItemCode = "MI009",
+                    ItemName = "校准测量仪器",
+                    MaintenancePlanId = plan4Id,
+                    ItemType = 5, // 调整
+                    Method = "使用标准件校准测量仪器",
+                    Tool = "校准工具包",
+                    SequenceNo = 1,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                },
+                new MaintenanceItem
+                {
+                    ItemCode = "MI010",
+                    ItemName = "更换测试探针",
+                    MaintenancePlanId = plan4Id,
+                    ItemType = 4, // 更换
+                    Method = "拆下旧探针，安装新探针",
+                    Tool = "专用扳手",
+                    SequenceNo = 2,
+                    IsRequired = false,
+                    CreateTime = DateTime.Now
+                },
+                new MaintenanceItem
+                {
+                    ItemCode = "MI011",
+                    ItemName = "检查软件版本",
+                    MaintenancePlanId = plan4Id,
+                    ItemType = 1, // 检查
+                    Method = "确认软件版本是否为最新",
+                    SequenceNo = 3,
+                    IsRequired = true,
+                    CreateTime = DateTime.Now
+                }
+            };
+
+            // 添加所有维护项目
+            foreach (var item in items1.Concat(items2).Concat(items3).Concat(items4))
+            {
+                context.Add(item);
+            }
+
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"维护项目数据添加完成，共{items1.Count + items2.Count + items3.Count + items4.Count}条");
+        }
+
+
+        /// <summary>
+        /// 初始化设备参数记录数据
+        /// </summary>
+        private static async Task InitializeParameterLogsAsync(MesDbContext context)
+        {
+            Debug.WriteLine("开始添加设备参数记录数据");
+
+            // 检查是否已存在参数记录数据
+            if (await context.Set<EquipmentParameterLog>().AnyAsync())
+            {
+                Debug.WriteLine("设备参数记录数据已存在，跳过初始化");
+                return;
+            }
+
+            // 获取设备数据
+            var equipments = await context.Set<Equipment>().ToListAsync();
+            if (equipments == null || equipments.Count == 0)
+            {
+                Debug.WriteLine("找不到设备数据，跳过参数记录初始化");
+                return;
+            }
+
+            // 创建SMT贴片机的参数记录
+            var smtLogs = new List<EquipmentParameterLog>();
+
+            // 温度参数记录
+            for (int i = 0; i < 24; i++)
+            {
+                double baseTemp = 45.0;
+                double tempVariation = Math.Sin(i * Math.PI / 12) * 5.0; // 温度在一天内有波动
+                double actualTemp = baseTemp + tempVariation;
+                bool isAlarm = actualTemp > 55.0;
+
+                var tempLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[0].ResourceId,
+                    ParameterCode = "TEMP",
+                    ParameterName = "工作温度",
+                    ParameterValue = actualTemp.ToString("F1"),
+                    Unit = "°C",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)2 : null, // 警告级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                smtLogs.Add(tempLog);
+            }
+
+            // 压力参数记录
+            for (int i = 0; i < 24; i += 2)
+            {
+                double basePressure = 0.60;
+                double pressureVariation = (new Random().NextDouble() - 0.5) * 0.1; // 随机波动
+                double actualPressure = basePressure + pressureVariation;
+                bool isAlarm = actualPressure < 0.5 || actualPressure > 0.7;
+
+                var pressureLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[0].ResourceId,
+                    ParameterCode = "PRES",
+                    ParameterName = "气压",
+                    ParameterValue = actualPressure.ToString("F2"),
+                    Unit = "MPa",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)1 : null, // 提示级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                smtLogs.Add(pressureLog);
+            }
+
+            // 电流参数记录
+            for (int i = 0; i < 24; i += 3)
+            {
+                double baseCurrent = 10.0;
+                double currentVariation = (new Random().NextDouble() - 0.5) * 2.0; // 随机波动
+                double actualCurrent = baseCurrent + currentVariation;
+                bool isAlarm = actualCurrent > 12.0;
+
+                var currentLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[0].ResourceId,
+                    ParameterCode = "CURR",
+                    ParameterName = "电流",
+                    ParameterValue = actualCurrent.ToString("F1"),
+                    Unit = "A",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)3 : null, // 严重级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                smtLogs.Add(currentLog);
+            }
+
+            // 创建焊接工位的参数记录
+            var weldLogs = new List<EquipmentParameterLog>();
+
+            // 温度参数记录
+            for (int i = 0; i < 12; i += 1)
+            {
+                double baseTemp = 350.0;
+                double tempVariation = (new Random().NextDouble() - 0.5) * 20.0; // 随机波动
+                double actualTemp = baseTemp + tempVariation;
+                bool isAlarm = actualTemp < 320.0 || actualTemp > 380.0;
+
+                var tempLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[1].ResourceId,
+                    ParameterCode = "TEMP",
+                    ParameterName = "焊接温度",
+                    ParameterValue = actualTemp.ToString("F1"),
+                    Unit = "°C",
+                    CollectTime = DateTime.Now.Date.AddHours(i * 2),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)2 : null, // 警告级别
+                    CreateTime = DateTime.Now.Date.AddHours(i * 2)
+                };
+                weldLogs.Add(tempLog);
+            }
+
+            // 创建测试台的参数记录
+            var testLogs = new List<EquipmentParameterLog>();
+
+            // 电压参数记录
+            for (int i = 0; i < 24; i += 4)
+            {
+                double baseVoltage = 220.0;
+                double voltageVariation = (new Random().NextDouble() - 0.5) * 10.0; // 随机波动
+                double actualVoltage = baseVoltage + voltageVariation;
+                bool isAlarm = actualVoltage < 210.0 || actualVoltage > 230.0;
+
+                var voltageLog = new EquipmentParameterLog
+                {
+                    EquipmentId = equipments[2].ResourceId,
+                    ParameterCode = "VOLT",
+                    ParameterName = "电源电压",
+                    ParameterValue = actualVoltage.ToString("F1"),
+                    Unit = "V",
+                    CollectTime = DateTime.Now.Date.AddHours(i),
+                    IsAlarm = isAlarm,
+                    AlarmLevel = isAlarm ? (byte)1 : null, // 提示级别
+                    CreateTime = DateTime.Now.Date.AddHours(i)
+                };
+                testLogs.Add(voltageLog);
+            }
+
+            // 添加所有参数记录
+            foreach (var log in smtLogs.Concat(weldLogs).Concat(testLogs))
+            {
+                context.Add(log);
+            }
+
+            await context.SaveChangesAsync();
+            Debug.WriteLine($"设备参数记录数据添加完成，共{smtLogs.Count + weldLogs.Count + testLogs.Count}条");
+        }
+
+
     }
 } 
